@@ -3,7 +3,7 @@ import caller from "./caller";
 async function increment({name, join, value, dir, query, result}: {name: string, join: string, value: number, dir: string, query: any, result: any}) {
     const {type, statFieldName, id} = buildInfos({name, join, query, result});
     await callRawUpdateOnItem(type, id, {
-        '$in': {
+        '$inc': {
             [statFieldName]: value,
         },
     }, dir);
