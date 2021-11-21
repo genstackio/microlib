@@ -1,3 +1,5 @@
+import {buildAllowedTransitions} from "./utils";
+
 export const boolean = () => ({test: v => 'boolean' === typeof v, message: v => `Not a boolean (actual: ${v})`});
 export const ipv4 = () => match({pattern: '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$', message: 'Not a valid IP v4 address'});
 export const even = () => ({test: v => 0 === (v % 2), message: v => `Even number expected (${v})`});
@@ -12,6 +14,25 @@ export const range = ({min, max}) => ({test: v => (v >= min) && (v <= max), mess
 export const minLength = ({min: x}) => ({test: v => v.length >= x, message: v => `Min length not satisfied (${v.length} < ${x})`});
 export const maxLength = ({max: x}) => ({test: v => v.length <= x, message: v => `Max length exceeded (${v.length} > ${x})`});
 export const values = ({values: x}) => ({test: v => !!x.find(a => a === v), message: v => `Value not allowed (actual: ${v}, allowed: ${x.join(',')})`});
+export const transition = ({transitions, property, query}) => {
+    const current = ((query && query.oldData) ? query.oldData[property] : undefined);
+    const getAllowedTransitions = (next: string|undefined) => buildAllowedTransitions(transitions, current, 'undefined');
+    const test = next => {
+        const allowedTransitions = getAllowedTransitions(next)
+        return (next !== current) && (allowedTransitions.includes(next) || allowedTransitions.includes('*'));
+    }
+    const message = next => {
+        const allowedTransitions = getAllowedTransitions(next);
+        if (!current) {
+            return `Value '${next}' is not allowed (allowed: ${allowedTransitions.join(', ')})`;
+        }
+        if (current === next) {
+            return `Already in '${current}' step`;
+        }
+        return `Transition from '${current}' to '${next}' is not allowed (allowed: ${allowedTransitions.join(', ')})`;
+    }
+    return {test, message};
+}
 export const currencyCode = () => ({test: v => !!(require('currency-codes').code(v)), message: v => `Unknown currency code '${v}'`});
 export const match = ({pattern, flags = undefined, message = undefined}: {pattern: string, flags?: any, message: string|undefined}) => ({test: v => new RegExp(pattern, flags).test(v), message: v => message ? (<any>message).replace('{{v}}', v) : `Malformed (actual: ${v}, expected: ${pattern})`});
 export const hasUpperLetter = () => match({pattern: '[A-Z]+', message: 'At least one upper case letter is required'});

@@ -1,6 +1,6 @@
 const testMock = jest.fn();
 jest.mock('../src/hooks/test', () => ({default: testMock}), {virtual: true});
-import {createHelpers, isTransition} from '../src/utils';
+import {buildAllowedTransitions, createHelpers, isTransition} from '../src/utils';
 
 beforeEach(() => {
     jest.resetAllMocks();
@@ -58,3 +58,39 @@ describe('isTransition', () => {
         )
     ;
 });
+
+const complexWorkflow1 = {
+    undefined: ['CREATED'],
+    CREATED: ['PROMISED', 'PAID', 'CANCELED', 'FAILED', 'ADMIN_CANCEL'],
+    PROMISED: ['PAID', 'CANCELED', 'FAILED', 'ADMIN_CANCEL'],
+    PAID: ['SUCCESS_ACK', 'CANCELED', 'ADMIN_CANCEL'],
+    CANCELED: ['CANCEL_ACK', 'ADMIN_CANCEL'],
+    FAILED: ['FAIL_ACK', 'ADMIN_CANCEL'],
+    FAIL_ACK: ['ADMIN_CANCEL'],
+    CANCEL_ACK: ['ADMIN_CANCEL'],
+    SUCCESS_ACK: ['ADMIN_CANCEL'],
+    ADMIN_CANCEL: ['ADMIN_CANCELED'],
+};
+
+describe('buildAllowedTransitions', () => {
+    [
+        [undefined, undefined, ['*']],
+        [undefined, 'CREATED', ['*']],
+        [{}, undefined, []],
+        [{}, 'CREATED', []],
+        [{'*': ['*']}, undefined, ['*']],
+        [{'*': ['*']}, 'CREATED', ['*']],
+        [{'*': ['PAID']}, 'CREATED', ['PAID']],
+        [{'CREATED': ['PAID']}, 'CREATED', ['PAID']],
+        [{'CREATED': ['PAID'], 'PAID': ['SUCCESS_ACK']}, 'CREATED', ['PAID']],
+        [{'CREATED': ['PAID'], 'PAID': ['SUCCESS_ACK']}, 'PAID', ['SUCCESS_ACK']],
+        [{'CREATED': ['PAID'], 'PAID': ['SUCCESS_ACK']}, 'SUCCESS_ACK', []],
+        [complexWorkflow1, undefined, ['CREATED']],
+        [complexWorkflow1, 'CREATED', ['ADMIN_CANCEL', 'CANCELED', 'FAILED', 'PAID', 'PROMISED']],
+    ]
+        .forEach(
+            ([transitions, current, allowed]: any) => it(`${current}(${JSON.stringify(transitions)}) => ${JSON.stringify(allowed)}`, () => {
+                expect(buildAllowedTransitions(transitions, current, 'undefined')).toEqual(allowed);
+            })
+        )
+})

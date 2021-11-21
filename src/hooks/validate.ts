@@ -41,7 +41,7 @@ export default ({model: {fields = {}, privateFields = {}, requiredFields = {}, v
         if (!validators[k]) return;
         if ((undefined === v) || (null === v)) return; // value is empty no need to validate with special validators
         await Promise.all(validators[k].map(async ({type, config = {}}) => {
-            const validator: {test?: Function, message?: Function, check?: Function, postValidate?: Function} = getValidator(type, dir)({...config, dir});
+            const validator: {test?: Function, message?: Function, check?: Function, postValidate?: Function} = getValidator(type, dir)({...config, query: data, property: k, dir});
             let isInError = false;
             if (validator.test) {
                 if (!(await validator.test(v, localCtx))) {
