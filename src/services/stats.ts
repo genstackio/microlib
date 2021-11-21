@@ -2,51 +2,27 @@ import caller from "./caller";
 
 async function increment({name, join, value, dir, query, result}: {name: string, join: string, value: number, dir: string, query: any, result: any}) {
     const {type, statFieldName, id} = buildInfos({name, join, query, result});
-    if (!id) return;
-    await caller.execute(
-        `${type}_rawUpdate`,
-        {
-            id,
-            data: {
-                '$inc': {
-                    [statFieldName]: value,
-                },
-            },
+    await callRawUpdateOnItem(type, id, {
+        '$in': {
+            [statFieldName]: value,
         },
-        dir
-    )
+    }, dir);
 }
 
 async function decrement({name, join, value, dir, query, result}: {name: string, join: string, value: number, dir: string, query: any, result: any}) {
     const {type, statFieldName, id} = buildInfos({name, join, query, result});
-    if (!id) return;
-    await caller.execute(
-        `${type}_rawUpdate`,
-        {
-            id,
-            data: {
-                '$dec': {
-                    [statFieldName]: value,
-                },
-            },
+    await callRawUpdateOnItem(type, id, {
+        '$dec': {
+            [statFieldName]: value,
         },
-        dir
-    )
+    }, dir);
 }
 
 async function reset({name, join, dir, query, result}: {name: string, join: string, dir: string, query: any, result: any}) {
     const {type, statFieldName, id} = buildInfos({name, join, query, result});
-    if (!id) return;
-    await caller.execute(
-        `${type}_rawUpdate`,
-        {
-            id,
-            data: {
-                '$reset': [statFieldName],
-            },
-        },
-        dir
-    )
+    await callRawUpdateOnItem(type, id, {
+        '$reset': [statFieldName],
+    }, dir);
 }
 
 async function update({action: {type}, ...rest}: any) {
@@ -60,12 +36,21 @@ async function update({action: {type}, ...rest}: any) {
 
 function buildInfos({name, join, query, result}: {name: string, join: string, query: any, result: any}) {
     const [type, statFieldName] = name.split('.');
-    const id = (result && result[join]) || (query && query.data && query.data[join]) || (query.oldData && query.oldData[join]);
+    const id = (result && result[join]) || (query && query.data && query.data[join]) || (query && query.oldData && query.oldData[join]);
     if (!id) {
         console.error(`Unable to retrieve id of ${type} from result/query/query.oldData for updating '${statFieldName}' stat`);
     }
 
     return {type, statFieldName, id};
+}
+
+async function callRawUpdateOnItem(type: string, id: string|undefined, data: any, dir: string) {
+    if (!id) return;
+    return caller.execute(
+        `${type}_rawUpdate`,
+        {id, data},
+        `${dir}/services/crud`,
+    );
 }
 
 const service = {
