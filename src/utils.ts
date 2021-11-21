@@ -69,8 +69,17 @@ export const createHelpers = (model, dir) => {
             return h({...c, o: operation, on, operationName: on, model, dir, hook})(...args);
         };
         const call = async (name, ...args) => caller.execute(name, args, origDir);
-        const stats = async (name, key, mode, result, query) =>
-            hook(`@${mode}-stats`, [result, query], {name, key, mode})
+        const incrementStat = async (name, value, result, query) =>
+            hook(`@increment-stat`, [result, query], {name, value})
+        ;
+        const decrementStat = async (name, value, result, query) =>
+            hook(`@decrement-stat`, [result, query], {name, value})
+        ;
+        const updateStat = async (name, result, query, config = {}) =>
+            hook(`@update-stat`, [result, query], {...config, name})
+        ;
+        const resetStat = async (name, result, query) =>
+            hook(`@reset-stat`, [result, query], {name})
         ;
         const updateRefs = async (name, key, value) => {
             // @todo handle multiple page
@@ -114,7 +123,7 @@ export const createHelpers = (model, dir) => {
         const after = async (result, query) => hook('@after', [result, query]);
         const convert = async (result, query) => hook('@convert', [result, query]);
         const dispatch = async (result, query) => hook('@dispatch', [result, query]);
-        return {stats, requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform, convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo, isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo, hook, updateRefs, deleteRefs, call, lambdaEvent, snsPublish};
+        return {incrementStat, decrementStat, updateStat, resetStat, requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform, convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo, isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo, hook, updateRefs, deleteRefs, call, lambdaEvent, snsPublish};
     };
 }
 
