@@ -69,17 +69,17 @@ export const createHelpers = (model, dir) => {
             return h({...c, o: operation, on, operationName: on, model, dir, hook})(...args);
         };
         const call = async (name, ...args) => caller.execute(name, args, origDir);
-        const incrementStat = async (name, value, result, query) =>
-            hook(`@increment-stat`, [result, query], {name, value})
+        const incrementStat = async (name, value, join, result, query) =>
+            hook(`@increment-stat`, [result, query], {name, value, join})
         ;
-        const decrementStat = async (name, value, result, query) =>
-            hook(`@decrement-stat`, [result, query], {name, value})
+        const decrementStat = async (name, value, join, result, query) =>
+            hook(`@decrement-stat`, [result, query], {name, value, join})
         ;
         const updateStat = async (name, result, query, config = {}) =>
             hook(`@update-stat`, [result, query], {...config, name})
         ;
-        const resetStat = async (name, result, query) =>
-            hook(`@reset-stat`, [result, query], {name})
+        const resetStat = async (name, join, result, query) =>
+            hook(`@reset-stat`, [result, query], {name, join})
         ;
         const updateRefs = async (name, key, value) => {
             // @todo handle multiple page
