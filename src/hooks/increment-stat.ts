@@ -1,4 +1,3 @@
-export default ({name, value}: {name: string, value: number}) => async (result, query) => {
-    // @todo
-    return result;
-}
+import stats from '../services/stats';
+
+export default config => async (result, query) => stats.increment({...config, result, query});

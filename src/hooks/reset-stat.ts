@@ -1,4 +1,3 @@
-export default ({name}: {name: string}) => async (result, query) => {
-    // @todo
-    return result;
-}
+import stats from '../services/stats';
+
+export default config => async (result, query) => stats.reset({...config, result, query});
