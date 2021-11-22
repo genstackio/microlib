@@ -86,3 +86,10 @@ export const operation = ({operation, dir}) => async (data, query) => {
     operation = replaceVars(operation, data);
     return require('./services/caller').default.execute(operation, [{...query, ...data}], `${dir}/services/crud`);
 }
+export const pattern_url = (config: any) => {
+    const pattern = process.env[`${(config['pattern_url'] || '').toUpperCase()}_URL_PATTERN`] || undefined
+    return completeDoc => {
+        if (!pattern) return undefined;
+        return replaceVars(pattern, completeDoc) || undefined;
+    }
+}
