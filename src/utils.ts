@@ -99,6 +99,7 @@ export const createHelpers = (model, dir) => {
         const snsPublish = async (topic, message, attributes = {}) =>
             require('./services/aws/sns').default.publish({message, attributes, topic})
         ;
+        const event = async (detailType: string, result: any, query: any) => hook('@eventbridge/send', [result, query], {detailType});
         const deleteRefs = async (name, key, value) => {
             // @todo handle multiple page
             try {
@@ -123,7 +124,7 @@ export const createHelpers = (model, dir) => {
         const after = async (result, query) => hook('@after', [result, query]);
         const convert = async (result, query) => hook('@convert', [result, query]);
         const dispatch = async (result, query) => hook('@dispatch', [result, query]);
-        return {incrementStat, decrementStat, updateStat, resetStat, requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform, convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo, isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo, hook, updateRefs, deleteRefs, call, lambdaEvent, snsPublish};
+        return {event, incrementStat, decrementStat, updateStat, resetStat, requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform, convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo, isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo, hook, updateRefs, deleteRefs, call, lambdaEvent, snsPublish};
     };
 }
 

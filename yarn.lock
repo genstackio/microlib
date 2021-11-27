@@ -487,10 +487,10 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@ohoareau/aws@^0.1.9":
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.1.9.tgz#c412a63974842eacf8f18d06fdea66ecf7c8e507"
-  integrity sha512-uMQOkcoRxS35HfL+8cJWRH4UlGIiNScEGzUtgmFkaVqEoMY9wnoGHtQQRort9JYxbWHuw3mSSvH7X7R0wYwU+w==
+"@ohoareau/aws@^0.1.12":
+  version "0.1.12"
+  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.1.12.tgz#ed70ebe5ccca51e886857f23230d11d89d62975f"
+  integrity sha512-7LBdiLukLcose3BrSbgDLO58nOrGMJRu86qFBtZOS1n8ZHLNj53QgJC2spMCIazjFnaDK20aKUH/dX2Xraf1VQ==
   dependencies:
     "@ohoareau/errors" "^0.1.0"
     uuid "^8.3.1"

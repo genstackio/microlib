@@ -22,7 +22,7 @@
         "test": "jest --config jest.config.js"
     },
     "dependencies": {
-        "@ohoareau/aws": "^0.1.9",
+        "@ohoareau/aws": "^0.1.12",
         "@ohoareau/build-package": "^0.1.2",
         "@ohoareau/errors": "^0.1.0",
         "bcryptjs": "^2.4.3",
