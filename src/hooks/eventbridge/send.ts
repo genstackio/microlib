@@ -7,7 +7,7 @@ export default ({source = 'api', o, detailType, docKey = 'doc', userKey = 'user'
             [docKey]: result,
             [userKey]: query.user,
         },
-        `${process.env.EVENTBRIDGE_SOURCE_PREFIX || ''}${source}`
+        source
     );
     return result;
 }
