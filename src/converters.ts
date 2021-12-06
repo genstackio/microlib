@@ -95,7 +95,7 @@ export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName
             }
         }));
     }
-    return v;
+    return x;
 }
 
 function buildPublicImageBucketKey(key) {
