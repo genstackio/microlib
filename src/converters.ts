@@ -26,7 +26,7 @@ export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName
 
     const incomingName = (query?.aliases || {})[attribute] || attribute;
     const selection = (query?.selections || {})[incomingName] || {};
-    const selected = Object.keys(selection);
+    const selected = Object.values((selection || {})['fields'] || []);
     const s3 = require('@ohoareau/aws').s3;
     const cdnObject = (x.available && process.env.PUBLIC_IMAGE_BUCKET_NAME)
         ? {
