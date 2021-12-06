@@ -305,7 +305,7 @@ export default {
             find: async (payload) => {
                 debugServiceDynamooseFind('payload %j', payload);
                 const decodedPayload = decodePayload(payload);
-                debugServiceDynamooseFind('decodedPayload %j', payload);
+                debugServiceDynamooseFind('decodedPayload %j', {...payload, fields: payload.selections?.items?.fields || []});
                 const r = buildPage(await runQuery(model, decodedPayload));
                 debugServiceDynamooseFind('result %j', r);
                 return r;
