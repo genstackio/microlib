@@ -24,10 +24,11 @@ async function populateItem(result, query, defs, selectedFields, dir) {
 }
 
 export default ({model, dir}) => async (result, query, mode: string = 'item') => {
-    const selectedFields = (query.fields && query.fields.length) ? query.fields : Object.keys(model.dynamics || {});
+    let selectedFields = (query.fields && query.fields.length) ? query.fields : Object.keys(model.dynamics || {});
     const defs = model.dynamics || {};
     switch (mode) {
         case 'page':
+            selectedFields = query.selections?.items?.fields || Object.keys(model.dynamics || {});
             result.items = await Promise.all(result.items.map(item => populateItem({...item}, query, defs, selectedFields, dir)))
             break;
         default:
