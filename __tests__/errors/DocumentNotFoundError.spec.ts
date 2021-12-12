@@ -36,6 +36,8 @@ describe('DocumentNotFoundError', () => {
                 errorInfo: {
                     id: 'theId2',
                     type: 'theType2',
+                    key: 'id',
+                    value: 'theId2',
                 },
                 errorType: 'document-not-found',
                 message: "Unknown theType2 'theId2'",
