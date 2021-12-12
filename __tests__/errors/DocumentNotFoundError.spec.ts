@@ -6,7 +6,15 @@ describe('DocumentNotFoundError', () => {
             // noinspection ExceptionCaughtLocallyJS
             throw new DocumentNotFoundError('theType', 'theId');
         } catch (e: any) {
-            expect(e.message).toEqual("theType 'theId' does not exist");
+            expect(e.message).toEqual("Unknown theType 'theId'");
+        }
+    });
+    it('throwable with custom field name', async () => {
+        try {
+            // noinspection ExceptionCaughtLocallyJS
+            throw new DocumentNotFoundError('theType', 'theId', 'theField');
+        } catch (e: any) {
+            expect(e.message).toEqual("Unknown theType with theField is 'theId'");
         }
     });
     it('id is not a string', async () => {
@@ -14,7 +22,7 @@ describe('DocumentNotFoundError', () => {
             // noinspection ExceptionCaughtLocallyJS
             throw new DocumentNotFoundError('theType', ['theNon', 'StringId']);
         } catch (e: any) {
-            expect(e.message).toEqual("theType '[\"theNon\",\"StringId\"]' does not exist");
+            expect(e.message).toEqual("Unknown theType '[\"theNon\",\"StringId\"]'");
         }
     });
     it('serializable', async () => {
@@ -30,7 +38,7 @@ describe('DocumentNotFoundError', () => {
                     type: 'theType2',
                 },
                 errorType: 'document-not-found',
-                message: "theType2 'theId2' does not exist",
+                message: "Unknown theType2 'theId2'",
             });
         }
     });
