@@ -2,11 +2,10 @@ import AbstractError from './AbstractError';
 
 export default class DocumentNotFoundError extends AbstractError {
     public readonly type: string;
-    public readonly id: string;
-    constructor(type, id) {
-        id = ('string' === typeof id) ? id : JSON.stringify(id);
-        super(`${type} '${id}' does not exist`, 404, 'document-not-found', {}, {type, id});
+    constructor(type, value, key: string = 'id') {
+        value = ('string' === typeof value) ? value : JSON.stringify(value);
+        super(`Unknown ${type} ${'id' === key ? '' : `with ${key} is `}'${value}'`, 404, 'document-not-found', {}, {type, [key]: value});
         this.type = type;
-        this.id = id;
+        this[key] = value;
     }
 }
