@@ -150,7 +150,7 @@ const applyModifiers = (q, modifiers) => modifiers.reduce((qq, m) => {
         case 'beginsWith':
             return qq.beginsWith(m.value);
         case 'between':
-            return qq.between(...(Array.isArray(m) ? [m[0], m[1]] : [m.lowerBound, m.upperBound]));
+            return qq.between((undefined !== m['0']) ? m['0'] : m.lowerBound, (undefined !== m['1']) ? m['1'] : m.upperBound);
         case 'contains':
             return qq.contains(m.value);
         case 'in':
