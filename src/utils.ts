@@ -109,7 +109,7 @@ export const createHelpers = (model, dir) => {
                 console.error('Delete references FAILED', {name, key, value}, e);
             }
         };
-        const requires = async (query) => hook('@requires', query);
+        const requires = async (query, mode = 'item') => hook('@requires', [query, mode]);
         const dynamics = async (result, query, mode = 'item') => hook('@dynamics', [result, query, mode]);
         const validate = async (query, required = true) => hook('@validate', query, {required});
         const authorize = async (query) => hook('@authorize', query);
@@ -122,7 +122,7 @@ export const createHelpers = (model, dir) => {
         const prepopulate = async (query, prefix = undefined) => hook('@prepopulate', query, {prefix});
         const prepare = async query => hook('@prepare', query);
         const after = async (result, query) => hook('@after', [result, query]);
-        const convert = async (result, query) => hook('@convert', [result, query]);
+        const convert = async (result, query, mode = 'item') => hook('@convert', [result, query, mode]);
         const dispatch = async (result, query) => hook('@dispatch', [result, query]);
         return {event, incrementStat, decrementStat, updateStat, resetStat, requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform, convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo, isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo, hook, updateRefs, deleteRefs, call, lambdaEvent, snsPublish};
     };

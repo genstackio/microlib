@@ -1,4 +1,4 @@
-export default ({model}) => async (query) => {
+export default ({model}) => async (query, mode: string = 'item') => {
     const selectedFields = (query.fields && query.fields.length) ? query.fields : Object.keys(model.dynamics || {});
     query.fields = buildFields(selectedFields, model);
     return query;

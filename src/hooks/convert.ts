@@ -9,8 +9,20 @@ const getConverter = (type, dir) => {
     return t[type] || (() => x => x);
 };
 
-export default ({model: {converters = {}}, dir}) => async (data, query) => {
+export default ({model: {converters = {}}, dir}) => async (data, query, mode: string = 'item') => {
     data = data || {};
+    switch (mode) {
+        case 'page':
+            data.items = await Promise.all((data.items || []).map(async (d: any) => convertData(d, converters, dir, query)));
+            break;
+        default:
+        case 'item':
+            data = convertData(data, converters, dir, query);
+    }
+    return data;
+}
+
+async function convertData(data: any, converters: any, dir: string, query: any) {
     const dataKeys = Object.keys(data).reduce((acc, k) => Object.assign(acc, {[k]: true}), {});
     await Promise.all(Object.entries(converters).map(async ([k, attrConverters]) => {
         if (!dataKeys[k]) {
