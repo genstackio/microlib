@@ -82,16 +82,43 @@ export const createHelpers = (model, dir) => {
             hook(`@reset-stat`, [result, query], {name, join})
         ;
         const updateRefs = async (name, key, value) => {
-            // @todo handle multiple page
             try {
-                const page = await call(`${name}_find`, {criteria: {[key]: value}, fields: ['id']});
-                await Promise.all(((page || {}).items || []).map(async i => call(`${name}_update`, {
-                    id: i.id,
-                    data: {[key]: value}
-                })));
+                let offset: any = undefined;
+                let page: any = undefined;
+                let step = 0;
+                const limit = 500;
+                const maxSteps = 10000; // max limit * this value items.
+                do {
+                    page = await call(`${name}_find`, {
+                        offset,
+                        limit,
+                        criteria: {[key]: value},
+                        fields: ['id', 'cursor']
+                    });
+                    await Promise.all(((page || {}).items || []).map(async i => call(`${name}_update`, {
+                        id: i.id,
+                        data: {[key]: value}
+                    })));
+                    offset = (page || {}).cursor;
+                    step++;
+                } while(!!offset && (step < maxSteps));
+                if (!!offset) {
+                    // noinspection ExceptionCaughtLocallyJS
+                    throw new Error(`There was more than ${maxSteps} iteration of ${limit} items to process, aborting`);
+                }
             } catch (e: any) {
                 console.error('Update references FAILED', {name, key, value}, e);
             }
+        };
+        const addUpdateRefs = async (query, name, key, value, trackedFields) => {
+            query._updateRefs = query._updateRefs || [];
+            query._updateRefs.push({name, key, value, trackedFields});
+        };
+        const processUpdateRefs = async (query, result) => {
+            // @todo filter
+            await (query._updateRefs || []).filter(x => !!x).reduce(async (acc, {name, key, value}) => {
+                updateRefs(name, key, value);
+            }, Promise.resolve());
         };
         const lambdaEvent = async (arn, payload) =>
             require('./services/aws/lambda').default.execute(arn, payload, {async: true})
@@ -101,10 +128,28 @@ export const createHelpers = (model, dir) => {
         ;
         const event = async (detailType: string, result: any, query: any) => hook('@eventbridge/send', [result, query], {detailType});
         const deleteRefs = async (name, key, value) => {
-            // @todo handle multiple page
             try {
-                const page = await call(`${name}_find`, {criteria: {[key]: value}, fields: ['id']});
-                await Promise.all(((page || {}).items || []).map(async i => call(`${name}_delete`, {id: i.id})));
+                let offset: any = undefined;
+                let page: any = undefined;
+                let step = 0;
+                const limit = 500;
+                const maxSteps = 10000; // max limit * this value items.
+                do {
+                    page = await call(`${name}_find`, {
+                        offset,
+                        limit,
+                        criteria: {[key]: value},
+                        fields: ['id', 'cursor']
+                    });
+                    await Promise.all(((page || {}).items || []).map(async i => call(`${name}_delete`, {id: i.id})));
+                    offset = (page || {}).cursor;
+                    step++;
+                } while(!!offset && (step < maxSteps));
+                if (!!offset) {
+                    // noinspection ExceptionCaughtLocallyJS
+                    throw new Error(`There was more than ${maxSteps} iteration of ${limit} items to process, aborting`);
+                }
+
             } catch (e: any) {
                 console.error('Delete references FAILED', {name, key, value}, e);
             }
@@ -124,7 +169,7 @@ export const createHelpers = (model, dir) => {
         const after = async (result, query) => hook('@after', [result, query]);
         const convert = async (result, query, mode = 'item') => hook('@convert', [result, query, mode]);
         const dispatch = async (result, query) => hook('@dispatch', [result, query]);
-        return {event, incrementStat, decrementStat, updateStat, resetStat, requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform, convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo, isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo, hook, updateRefs, deleteRefs, call, lambdaEvent, snsPublish};
+        return {addUpdateRefs, processUpdateRefs, event, incrementStat, decrementStat, updateStat, resetStat, requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform, convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo, isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo, hook, updateRefs, deleteRefs, call, lambdaEvent, snsPublish};
     };
 }
 
