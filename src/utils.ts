@@ -116,9 +116,19 @@ export const createHelpers = (model, dir) => {
         };
         const processUpdateRefs = async (query, result) => {
             // @todo filter
-            await (query._updateRefs || []).filter(x => !!x).reduce(async (acc, {name, key, value}) => {
-                updateRefs(name, key, value);
-            }, Promise.resolve());
+            try {
+                await (query._updateRefs || []).filter(x => !!x).reduce(async (acc, {name, key, value}) => {
+                    try {
+                        await acc;
+                        await updateRefs(name, key, value);
+                        return;
+                    } catch (e: any) {
+                        console.error(`Process update reference FAILED on: ${e.message}`, {name, key, value});
+                    }
+                }, Promise.resolve());
+            } catch (e: any) {
+                console.error(`Process update globally FAILED: ${e.message}`);
+            }
         };
         const lambdaEvent = async (arn, payload) =>
             require('./services/aws/lambda').default.execute(arn, payload, {async: true})
