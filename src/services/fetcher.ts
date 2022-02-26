@@ -34,7 +34,7 @@ async function fetch({bucket, key, url, method, headers, apiUrl, body, dataKey, 
 
 async function fetchFromBucket({bucket, key}: {bucket: string, key: string}): Promise<{content: Buffer|Uint8Array|Blob|string|Readable, contentType: string|undefined}> {
     return {
-        content: await require('@ohoareau/aws').s3.getFileContent({bucket, key}),
+        content: await require('@ohoareau/aws').s3.getFileContent({bucket, key, raw: true}),
         contentType: undefined,
     };
 }
