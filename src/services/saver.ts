@@ -9,8 +9,8 @@ async function saveFrom(from: any, {bucket, key, contentType, name, algorithm}) 
     const {content, contentType: detectedContentType} = await fetcher.fetch(from);
     contentType = contentType || detectedContentType;
     const fingerprint = await computeContentFingerprint(content, {algorithm});
-    const to = {bucket, key, content, contentType, fingerprint, name};
-    await save(to);
+    const to = {bucket, key, contentType, fingerprint, name};
+    await save({content, ...to});
     return to;
 }
 

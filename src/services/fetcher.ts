@@ -47,15 +47,15 @@ async function extractBucketObjectInfosIfKnownBucket(url: string): Promise<undef
             switch (true) {
                 case /^s3.([^.]+).amazonaws.com/i.test(u.hostname):
                     detectedBucketObjectInfos = {
-                        region: u.replace(/^s3.([^.]+).amazonaws.com/i, '$1'),
+                        region: u.hostname.replace(/^s3.([^.]+).amazonaws.com/i, '$1'),
                         bucket: u.pathname.slice(1).split(/\//g)[0],
                         key: u.pathname.slice(1).split(/\//g).slice(1).join('/'),
                     };
                     break;
                 case /^([^.]+).s3.([^.]+).amazonaws.com/i.test(u.hostname):
                     detectedBucketObjectInfos = {
-                        bucket: u.replace(/^([^.]+).s3.([^.]+).amazonaws.com/i, '$1'),
-                        region: u.replace(/^([^.]+).s3.([^.]+).amazonaws.com/i, '$2'),
+                        bucket: u.hostname.replace(/^([^.]+).s3.([^.]+).amazonaws.com/i, '$1'),
+                        region: u.hostname.replace(/^([^.]+).s3.([^.]+).amazonaws.com/i, '$2'),
                         key: u.pathname.slice(1),
                     };
                     break;
@@ -83,7 +83,7 @@ async function fetchFromUrl({url, method = 'GET', headers = {}, body = undefined
     const http = require('./http').default;
     const res = await http.request(url, method, body, headers);
     if ((200 > res.status) || (300 <= res.status)) {
-        throw new Error(`Unable to fetch from url '${url}' (status code: ${res.status}'`);
+        throw new Error(`Unable to fetch from url '${url}' (status code: ${res.status})`);
     }
     return {
         content: await res.buffer(),
