@@ -48,8 +48,8 @@ export const image = ({bucket, key, name, contentType, algorithm = 'sha256'}) =>
     return saver.saveFrom(v, {
         bucket: replaceVars(bucket, vars),
         key: replaceVars(key, vars),
-        name: name ? replaceVars(name, vars) : undefined,
-        contentType: contentType ? replaceVars(contentType, vars) : undefined,
+        name: (v && v['contentType']) ? v['name'] : (name ? replaceVars(name, vars) : undefined),
+        contentType: (v && v['contentType']) ? v['contentType'] : (contentType ? replaceVars(contentType, vars) : undefined),
         algorithm,
     });
 }
