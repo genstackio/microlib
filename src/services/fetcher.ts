@@ -43,7 +43,7 @@ async function extractBucketObjectInfosIfKnownBucket(url: string): Promise<undef
     try {
         const u = new (require('url').URL)(url);
         let detectedBucketObjectInfos: any = undefined;
-        if (u.protocol === 'https') {
+        if ((u.protocol === 'https:') || (u.protocol === 'http:')) {
             switch (true) {
                 case /^s3.([^.]+).amazonaws.com/i.test(u.hostname):
                     detectedBucketObjectInfos = {
@@ -62,7 +62,7 @@ async function extractBucketObjectInfosIfKnownBucket(url: string): Promise<undef
                 default:
                     return undefined;
             }
-        } else if (u.protocol === 's3') {
+        } else if (u.protocol === 's3:') {
             detectedBucketObjectInfos = {
                 bucket: u.hostname,
                 key: u.pathname.slice(1),
