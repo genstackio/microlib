@@ -80,7 +80,7 @@ async function extractBucketObjectInfosIfKnownBucket(url: string): Promise<undef
 async function fetchFromUrl({url, method = 'GET', headers = {}, body = undefined}: {url: string, method?: string, headers?: any, body?: any}): Promise<{content: Buffer|Uint8Array|Blob|string|Readable, contentType: string|undefined}> {
     const bucketObjectInfos = await extractBucketObjectInfosIfKnownBucket(url);
     if (!!bucketObjectInfos) return fetchFromBucket(bucketObjectInfos);
-    const http = require('./services/http').default;
+    const http = require('./http').default;
     const res = await http.request(url, method, body, headers);
     if ((200 > res.status) || (300 <= res.status)) {
         throw new Error(`Unable to fetch from url '${url}' (status code: ${res.status}'`);
@@ -91,7 +91,7 @@ async function fetchFromUrl({url, method = 'GET', headers = {}, body = undefined
     };
 }
 async function fetchFromApi({apiUrl, method = 'GET', body = undefined, headers = {}, dataKey = 'url'}: {apiUrl: string, method?: string, headers?: any, body?: any, dataKey?: string}): Promise<{content: Buffer|Uint8Array|Blob|string|Readable, contentType: string|undefined}> {
-    const http = require('./services/http').default;
+    const http = require('./http').default;
     const res = await http.request(apiUrl, method, body, headers);
     if ((200 > res.status) || (300 <= res.status)) {
         throw new Error(`Unable to fetch from api url '${apiUrl}' (status code: ${res.status}'`);
