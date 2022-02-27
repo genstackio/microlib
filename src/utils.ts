@@ -194,7 +194,7 @@ export function replaceFn(pattern, fn: Function, startTagPattern = '\\[\\[', end
     }, pattern);
 }
 export function replaceVars(pattern, data = {}, startTagPattern = '\\{\\{', endTagPattern = '\\}\\}') {
-    pattern = replaceFn(pattern, (x: string) => process.env[x || ''] || '', '\[\[', '\]\]');
+    pattern = replaceFn(pattern, (x: string) => process.env[x || ''] || '', '\\[\\[', '\\]\\]');
 
     return replaceFn(pattern, k => ('undefined' === typeof data[k]) ? '' : data[k], startTagPattern, endTagPattern);
 }
