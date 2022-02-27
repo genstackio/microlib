@@ -14,11 +14,11 @@ export const s3file_url_dl = () => async v => v ? (await require('@ohoareau/aws'
 export const s3file_url_dl_infos = () => async v => v ? require('@ohoareau/aws').s3.getFileDownloadUrl(v) : undefined;
 export const s3file_url_ul = () => async v => v ? (await require('@ohoareau/aws').s3.getFileUploadUrl(v)).uploadUrl : undefined;
 export const s3file_url_ul_infos = () => async v => v ? require('@ohoareau/aws').s3.getFileUploadUrl(v) : undefined;
-export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName, attribute}) => async (v, result, query) => {
+export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName, attribute, urlPattern}) => async (v, result, query) => {
     const x = {available: false};
     if (v && v.fingerprint) x.available = true;
+    const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
     if (!x.available) {
-        const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
         archiveBucket = replaceVars(archiveBucket, vars)
         archiveKey = replaceVars(archiveKey, vars);
         archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
@@ -59,7 +59,7 @@ export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName
                 case 'fingerprint': x['fingerprint'] = v['fingerprint']; break;
                 case 'content': x['content'] = await s3.getFileContent(vv); break;
                 case 'cdnUrl': x['cdnUrl'] = cdnObject ? await buildImageCdnUrl({...(cdnObject || {}), fingerprint: v['fingerprint']} as any, selection[k]) : undefined; break;
-                case 'url': x['url'] = (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v) : (await s3.getFileViewUrl(vv)).viewUrl; break;
                 case 'urlInfos': x['urlInfos'] = await s3.getFileViewUrl(vv); break;
                 case 'viewUrl': x['viewUrl'] = (await s3.getFileViewUrl(vv)).viewUrl; break;
                 case 'viewUrlInfos': x['viewUrlInfos'] = await s3.getFileViewUrl(vv); break;
@@ -98,6 +98,28 @@ export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName
     return x;
 }
 
+function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any) {
+    dynamicVars = {
+        extension: computeExtensionFromContentType(dynamicVars['contentType']),
+        ...dynamicVars,
+    };
+    pattern = replaceVars(pattern, vars);
+    return replaceVars(pattern, dynamicVars, '\<\<', '\>\>');
+}
+const extensionMap = {
+    'image/png': '.png',
+    'image/jpeg': '.jpg',
+    'image/svg+xml': '.svg',
+    'image/x-icon': '.ico',
+    'image/gif': '.gif',
+    'image/ief': '.ief',
+    'image/bmp': '.bmp',
+    'image/tiff': '.tif',
+    'application/octet-stream': '',
+}
+function computeExtensionFromContentType(type: string|undefined) {
+    return extensionMap[type || ''] || '';
+}
 function buildPublicImageBucketKey(key) {
     const parts = key.split('', 10);
     parts[parts.length - 1] = parts[parts.length - 1].slice(0, 1);
