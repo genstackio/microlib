@@ -183,19 +183,20 @@ export const createHelpers = (model, dir) => {
     };
 }
 
-export function replaceVars(pattern, data = {}, startTagPattern = '\{\{', endTagPattern = '\}\}') {
-    pattern = pattern.replaceAll(/\[\[process.env.([^\]]+)]]/, (_: any, captures: string[]) => process.env[captures[1] || ''] || '');
-
+export function replaceFn(pattern, fn: Function, startTagPattern = '\[\[', endTagPattern = '\]\]') {
     const r = new RegExp(`${startTagPattern}([^${startTagPattern}${endTagPattern}]+)${endTagPattern}`, 'g');
-    const matches = [...pattern.matchAll(r)];
-    const getValue = k => ('undefined' === typeof data[k]) ? '' : data[k];
 
-    return matches.reduce((acc, m) => {
+    return [...pattern.matchAll(r)].reduce((acc, m) => {
         for (let i = 0; i < (m.length - 1); i++) {
-            acc = acc.replace(m[0], getValue(m[i + 1]));
+            acc = acc.replace(m[0], fn(m[i + 1]));
         }
         return acc;
     }, pattern);
+}
+export function replaceVars(pattern, data = {}, startTagPattern = '\{\{', endTagPattern = '\}\}') {
+    pattern = replaceFn(pattern, (x: string) => process.env[x || ''] || '');
+
+    return replaceFn(pattern, k => ('undefined' === typeof data[k]) ? '' : data[k], startTagPattern, endTagPattern);
 }
 export function buildAllowedTransitions(transitions: any, value: string|undefined, valueIfUndefined: string) {
     let allowed: string[] = [];
