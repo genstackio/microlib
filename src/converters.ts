@@ -104,7 +104,7 @@ function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any) {
         ...dynamicVars,
     };
     pattern = replaceVars(pattern, vars);
-    return replaceVars(pattern, dynamicVars, '\<\<', '\>\>');
+    return replaceVars(pattern, dynamicVars, '\\<\\<', '\\>\\>');
 }
 const extensionMap = {
     'image/png': '.png',

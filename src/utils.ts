@@ -183,7 +183,7 @@ export const createHelpers = (model, dir) => {
     };
 }
 
-export function replaceFn(pattern, fn: Function, startTagPattern = '\[\[', endTagPattern = '\]\]') {
+export function replaceFn(pattern, fn: Function, startTagPattern = '\\[\\[', endTagPattern = '\\]\\]') {
     const r = new RegExp(`${startTagPattern}([^${startTagPattern}${endTagPattern}]+)${endTagPattern}`, 'g');
 
     return [...pattern.matchAll(r)].reduce((acc, m) => {
@@ -193,7 +193,7 @@ export function replaceFn(pattern, fn: Function, startTagPattern = '\[\[', endTa
         return acc;
     }, pattern);
 }
-export function replaceVars(pattern, data = {}, startTagPattern = '\{\{', endTagPattern = '\}\}') {
+export function replaceVars(pattern, data = {}, startTagPattern = '\\{\\{', endTagPattern = '\\}\\}') {
     pattern = replaceFn(pattern, (x: string) => process.env[x || ''] || '');
 
     return replaceFn(pattern, k => ('undefined' === typeof data[k]) ? '' : data[k], startTagPattern, endTagPattern);
