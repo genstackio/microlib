@@ -184,10 +184,7 @@ export const createHelpers = (model, dir) => {
 }
 
 export function replaceVars(pattern, data = {}, startTagPattern = '\{\{', endTagPattern = '\}\}') {
-    const envVarMatch = pattern.match(/^\[\[process.env.([^\]]+)]]$/);
-    if (envVarMatch) {
-        pattern = process.env[envVarMatch[1]] || '';
-    }
+    pattern = pattern.replaceAll(/\[\[process.env.([^\]]+)]]/, (_: any, captures: string[]) => process.env[captures[1] || ''] || '');
 
     const r = new RegExp(`${startTagPattern}([^${startTagPattern}${endTagPattern}]+)${endTagPattern}`, 'g');
     const matches = [...pattern.matchAll(r)];
