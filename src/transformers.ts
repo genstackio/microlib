@@ -45,6 +45,7 @@ export const s3file = ({bucket, key, name, contentType}) => async (v, query) => 
 }
 export const file = ({bucket, key, name, contentType, algorithm = 'sha256'}) => async (v, query) => {
     const vars = {...query, ...(query.oldData || {}), ...(query.data || {})};
+    if (v && v.content && ('**clear**' === v.content)) return '**clear**'; // empty the field
     return saver.saveFrom(v, {
         bucket: replaceVars(bucket, vars),
         key: replaceVars(key, vars),
