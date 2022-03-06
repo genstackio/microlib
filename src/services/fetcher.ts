@@ -111,8 +111,18 @@ const encodingMap = {
     latin1: 'latin1',
     utf16le: 'utf16le',
     json: 'json',
+    js: 'js',
+    css: 'css',
     svg: 'svg',
     csv: 'csv',
+    doc: 'doc',
+    docx: 'docx',
+    ppt: 'ppt',
+    pptx: 'pptx',
+    xls: 'xls',
+    xlsx: 'xlsx',
+    pdf: 'pdf',
+    rtf: 'rtf',
 }
 
 async function fetchFromContent({content, encoding = 'base64'}: {content: any, encoding?: 'base64' | 'base64url' | 'utf'}): Promise<{content: Buffer, contentType}> {
@@ -127,9 +137,49 @@ async function fetchFromContent({content, encoding = 'base64'}: {content: any, e
             content,
             contentType: 'image/svg+xml',
         }
+        case 'css': return {
+            content,
+            contentType: 'text/css',
+        }
+        case 'js': return {
+            content,
+            contentType: 'text/javascript',
+        }
         case 'csv': return {
             content,
             contentType: 'text/csv',
+        }
+        case 'pdf': return {
+            content,
+            contentType: 'application/pdf',
+        }
+        case 'xlsx': return {
+            content,
+            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        }
+        case 'xls': return {
+            content,
+            contentType: 'application/vnd.ms-excel',
+        }
+        case 'docx': return {
+            content,
+            contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        }
+        case 'doc': return {
+            content,
+            contentType: 'application/msword',
+        }
+        case 'pptx': return {
+            content,
+            contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        }
+        case 'ppt': return {
+            content,
+            contentType: 'application/vnd.ms-powerpoint',
+        }
+        case 'rtf': return {
+            content,
+            contentType: 'application/rtf',
         }
         default: return {
             content: Buffer.from(content, enc),

@@ -43,7 +43,7 @@ export const s3file = ({bucket, key, name, contentType}) => async (v, query) => 
     await require('@ohoareau/aws').s3.setFileContent({bucket, key}, v);
     return {bucket, key, name, contentType};
 }
-export const image = ({bucket, key, name, contentType, algorithm = 'sha256'}) => async (v, query) => {
+export const file = ({bucket, key, name, contentType, algorithm = 'sha256'}) => async (v, query) => {
     const vars = {...query, ...(query.oldData || {}), ...(query.data || {})};
     return saver.saveFrom(v, {
         bucket: replaceVars(bucket, vars),
@@ -53,6 +53,10 @@ export const image = ({bucket, key, name, contentType, algorithm = 'sha256'}) =>
         algorithm,
     });
 }
+export const image = file;
+export const css = file;
+export const js = file;
+
 export const list = () => v => {
     // for now, only array of STRINGs
     let x: any[] = [];

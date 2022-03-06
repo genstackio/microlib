@@ -98,6 +98,258 @@ export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName
     return x;
 }
 
+export const css = ({bucket: archiveBucket, key: archiveKey, name: archiveName, attribute, urlPattern}) => async (v, result, query) => {
+    const x = {available: false};
+    if (v && v.fingerprint) x.available = true;
+    const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
+    if (!x.available) {
+        archiveBucket = replaceVars(archiveBucket, vars)
+        archiveKey = replaceVars(archiveKey, vars);
+        archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
+    }
+
+    const incomingName = (query?.aliases || {})[attribute] || attribute;
+    const selection = (query?.selections || {})[incomingName] || {};
+    const selected = Object.values((selection || {})['fields'] || []);
+    const s3 = require('@ohoareau/aws').s3;
+    const cdnObject = (x.available && process.env.PUBLIC_CSS_BUCKET_NAME)
+        ? {
+            bucket: process.env.PUBLIC_CSS_BUCKET_NAME || undefined,
+            key: process.env.PUBLIC_CSS_BUCKET_NAME ? await buildPublicCssBucketKey(v['fingerprint']) : undefined,
+            contentType: v['contentType'],
+            name: v['name'],
+        }
+        : {}
+    ;
+    const vv = x.available ? {
+        bucket: cdnObject.bucket || v['bucket'],
+        key: cdnObject.key || v['key'],
+        contentType: v['contentType'],
+        name: v['name'],
+    } : {
+        bucket: archiveBucket,
+        key: archiveKey,
+        name: archiveName,
+    };
+    if (x.available) {
+        await Promise.all(selected.map(async k => {
+            switch (k) {
+                case 'bucket': x['bucket'] = v['bucket']; break;
+                case 'cdnBucket': x['cdnBucket'] = cdnObject['bucket']; break;
+                case 'key': x['key'] = v['key']; break;
+                case 'cdnKey': x['cdnKey'] = cdnObject['key']; break;
+                case 'name': x['name'] = v['name']; break;
+                case 'contentType': x['contentType'] = v['contentType']; break;
+                case 'fingerprint': x['fingerprint'] = v['fingerprint']; break;
+                case 'content': x['content'] = await s3.getFileContent(vv); break;
+                case 'cdnUrl': x['cdnUrl'] = cdnObject ? await buildImageCdnUrl({...(cdnObject || {}), fingerprint: v['fingerprint']} as any, selection[k]) : undefined; break;
+                case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v) : (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'urlInfos': x['urlInfos'] = await s3.getFileViewUrl(vv); break;
+                case 'viewUrl': x['viewUrl'] = (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'viewUrlInfos': x['viewUrlInfos'] = await s3.getFileViewUrl(vv); break;
+                case 'downloadUrl': x['downloadUrl'] = (await s3.getFileDownloadUrl(vv)).downloadUrl; break;
+                case 'downloadUrlInfos': x['downloadUrlInfos'] = await s3.getFileDownloadUrl(vv); break;
+                case 'uploadUrl': x['uploadUrl'] = (await s3.getFileUploadUrl(vv)).uploadUrl; break;
+                case 'uploadUrlInfos': x['uploadUrlInfos'] = await s3.getFileUploadUrl(vv); break;
+                case 'size':
+                case 'realContentType':
+                case 'eTag':
+                case 'lastModified':
+                    const metadata = await s3.getFileMetadata(vv);
+                    switch (k) {
+                        case 'size': x['size'] = metadata.contentLength; break;
+                        case 'realContentType': x['realContentType'] = metadata.contentType; break;
+                        case 'eTag': x['eTag'] = metadata.eTag; break;
+                        case 'lastModified': x['lastModified'] = metadata.lastModified.getTime(); break;
+                        default: break;
+                    }
+                    break;
+                default: break;
+            }
+        }));
+    } else {
+        await Promise.all(selected.map(async k => {
+            switch (k) {
+                case 'bucket': x['bucket'] = vv['bucket']; break;
+                case 'key': x['key'] = vv['key']; break;
+                case 'name': x['name'] = vv['name']; break;
+                case 'uploadUrl': x['uploadUrl'] = (await s3.getFileUploadUrl(vv)).uploadUrl; break;
+                case 'uploadUrlInfos': x['uploadUrlInfos'] = await s3.getFileUploadUrl(vv); break;
+                default: break;
+            }
+        }));
+    }
+    return x;
+}
+
+export const js = ({bucket: archiveBucket, key: archiveKey, name: archiveName, attribute, urlPattern}) => async (v, result, query) => {
+    const x = {available: false};
+    if (v && v.fingerprint) x.available = true;
+    const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
+    if (!x.available) {
+        archiveBucket = replaceVars(archiveBucket, vars)
+        archiveKey = replaceVars(archiveKey, vars);
+        archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
+    }
+
+    const incomingName = (query?.aliases || {})[attribute] || attribute;
+    const selection = (query?.selections || {})[incomingName] || {};
+    const selected = Object.values((selection || {})['fields'] || []);
+    const s3 = require('@ohoareau/aws').s3;
+    const cdnObject = (x.available && process.env.PUBLIC_JS_BUCKET_NAME)
+        ? {
+            bucket: process.env.PUBLIC_JS_BUCKET_NAME || undefined,
+            key: process.env.PUBLIC_JS_BUCKET_NAME ? await buildPublicJsBucketKey(v['fingerprint']) : undefined,
+            contentType: v['contentType'],
+            name: v['name'],
+        }
+        : {}
+    ;
+    const vv = x.available ? {
+        bucket: cdnObject.bucket || v['bucket'],
+        key: cdnObject.key || v['key'],
+        contentType: v['contentType'],
+        name: v['name'],
+    } : {
+        bucket: archiveBucket,
+        key: archiveKey,
+        name: archiveName,
+    };
+    if (x.available) {
+        await Promise.all(selected.map(async k => {
+            switch (k) {
+                case 'bucket': x['bucket'] = v['bucket']; break;
+                case 'cdnBucket': x['cdnBucket'] = cdnObject['bucket']; break;
+                case 'key': x['key'] = v['key']; break;
+                case 'cdnKey': x['cdnKey'] = cdnObject['key']; break;
+                case 'name': x['name'] = v['name']; break;
+                case 'contentType': x['contentType'] = v['contentType']; break;
+                case 'fingerprint': x['fingerprint'] = v['fingerprint']; break;
+                case 'content': x['content'] = await s3.getFileContent(vv); break;
+                case 'cdnUrl': x['cdnUrl'] = cdnObject ? await buildImageCdnUrl({...(cdnObject || {}), fingerprint: v['fingerprint']} as any, selection[k]) : undefined; break;
+                case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v) : (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'urlInfos': x['urlInfos'] = await s3.getFileViewUrl(vv); break;
+                case 'viewUrl': x['viewUrl'] = (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'viewUrlInfos': x['viewUrlInfos'] = await s3.getFileViewUrl(vv); break;
+                case 'downloadUrl': x['downloadUrl'] = (await s3.getFileDownloadUrl(vv)).downloadUrl; break;
+                case 'downloadUrlInfos': x['downloadUrlInfos'] = await s3.getFileDownloadUrl(vv); break;
+                case 'uploadUrl': x['uploadUrl'] = (await s3.getFileUploadUrl(vv)).uploadUrl; break;
+                case 'uploadUrlInfos': x['uploadUrlInfos'] = await s3.getFileUploadUrl(vv); break;
+                case 'size':
+                case 'realContentType':
+                case 'eTag':
+                case 'lastModified':
+                    const metadata = await s3.getFileMetadata(vv);
+                    switch (k) {
+                        case 'size': x['size'] = metadata.contentLength; break;
+                        case 'realContentType': x['realContentType'] = metadata.contentType; break;
+                        case 'eTag': x['eTag'] = metadata.eTag; break;
+                        case 'lastModified': x['lastModified'] = metadata.lastModified.getTime(); break;
+                        default: break;
+                    }
+                    break;
+                default: break;
+            }
+        }));
+    } else {
+        await Promise.all(selected.map(async k => {
+            switch (k) {
+                case 'bucket': x['bucket'] = vv['bucket']; break;
+                case 'key': x['key'] = vv['key']; break;
+                case 'name': x['name'] = vv['name']; break;
+                case 'uploadUrl': x['uploadUrl'] = (await s3.getFileUploadUrl(vv)).uploadUrl; break;
+                case 'uploadUrlInfos': x['uploadUrlInfos'] = await s3.getFileUploadUrl(vv); break;
+                default: break;
+            }
+        }));
+    }
+    return x;
+}
+
+export const file = ({bucket: archiveBucket, key: archiveKey, name: archiveName, attribute, urlPattern}) => async (v, result, query) => {
+    const x = {available: false};
+    if (v && v.fingerprint) x.available = true;
+    const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
+    if (!x.available) {
+        archiveBucket = replaceVars(archiveBucket, vars)
+        archiveKey = replaceVars(archiveKey, vars);
+        archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
+    }
+
+    const incomingName = (query?.aliases || {})[attribute] || attribute;
+    const selection = (query?.selections || {})[incomingName] || {};
+    const selected = Object.values((selection || {})['fields'] || []);
+    const s3 = require('@ohoareau/aws').s3;
+    const cdnObject = (x.available && process.env.PUBLIC_FILE_BUCKET_NAME)
+        ? {
+            bucket: process.env.PUBLIC_FILE_BUCKET_NAME || undefined,
+            key: process.env.PUBLIC_FILE_BUCKET_NAME ? await buildPublicFileBucketKey(v['fingerprint']) : undefined,
+            contentType: v['contentType'],
+            name: v['name'],
+        }
+        : {}
+    ;
+    const vv = x.available ? {
+        bucket: cdnObject.bucket || v['bucket'],
+        key: cdnObject.key || v['key'],
+        contentType: v['contentType'],
+        name: v['name'],
+    } : {
+        bucket: archiveBucket,
+        key: archiveKey,
+        name: archiveName,
+    };
+    if (x.available) {
+        await Promise.all(selected.map(async k => {
+            switch (k) {
+                case 'bucket': x['bucket'] = v['bucket']; break;
+                case 'cdnBucket': x['cdnBucket'] = cdnObject['bucket']; break;
+                case 'key': x['key'] = v['key']; break;
+                case 'cdnKey': x['cdnKey'] = cdnObject['key']; break;
+                case 'name': x['name'] = v['name']; break;
+                case 'contentType': x['contentType'] = v['contentType']; break;
+                case 'fingerprint': x['fingerprint'] = v['fingerprint']; break;
+                case 'content': x['content'] = await s3.getFileContent(vv); break;
+                case 'cdnUrl': x['cdnUrl'] = cdnObject ? await buildImageCdnUrl({...(cdnObject || {}), fingerprint: v['fingerprint']} as any, selection[k]) : undefined; break;
+                case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v) : (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'urlInfos': x['urlInfos'] = await s3.getFileViewUrl(vv); break;
+                case 'viewUrl': x['viewUrl'] = (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'viewUrlInfos': x['viewUrlInfos'] = await s3.getFileViewUrl(vv); break;
+                case 'downloadUrl': x['downloadUrl'] = (await s3.getFileDownloadUrl(vv)).downloadUrl; break;
+                case 'downloadUrlInfos': x['downloadUrlInfos'] = await s3.getFileDownloadUrl(vv); break;
+                case 'uploadUrl': x['uploadUrl'] = (await s3.getFileUploadUrl(vv)).uploadUrl; break;
+                case 'uploadUrlInfos': x['uploadUrlInfos'] = await s3.getFileUploadUrl(vv); break;
+                case 'size':
+                case 'realContentType':
+                case 'eTag':
+                case 'lastModified':
+                    const metadata = await s3.getFileMetadata(vv);
+                    switch (k) {
+                        case 'size': x['size'] = metadata.contentLength; break;
+                        case 'realContentType': x['realContentType'] = metadata.contentType; break;
+                        case 'eTag': x['eTag'] = metadata.eTag; break;
+                        case 'lastModified': x['lastModified'] = metadata.lastModified.getTime(); break;
+                        default: break;
+                    }
+                    break;
+                default: break;
+            }
+        }));
+    } else {
+        await Promise.all(selected.map(async k => {
+            switch (k) {
+                case 'bucket': x['bucket'] = vv['bucket']; break;
+                case 'key': x['key'] = vv['key']; break;
+                case 'name': x['name'] = vv['name']; break;
+                case 'uploadUrl': x['uploadUrl'] = (await s3.getFileUploadUrl(vv)).uploadUrl; break;
+                case 'uploadUrlInfos': x['uploadUrlInfos'] = await s3.getFileUploadUrl(vv); break;
+                default: break;
+            }
+        }));
+    }
+    return x;
+}
+
 function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any) {
     dynamicVars = {
         extension: computeExtensionFromContentType(dynamicVars['contentType']),
@@ -121,6 +373,21 @@ function computeExtensionFromContentType(type: string|undefined) {
     return extensionMap[type || ''] || '';
 }
 function buildPublicImageBucketKey(key) {
+    const parts = key.split('', 10);
+    parts[parts.length - 1] = parts[parts.length - 1].slice(0, 1);
+    return `${parts.join('/')}/${key}`;
+}
+function buildPublicCssBucketKey(key) {
+    const parts = key.split('', 10);
+    parts[parts.length - 1] = parts[parts.length - 1].slice(0, 1);
+    return `${parts.join('/')}/${key}`;
+}
+function buildPublicJsBucketKey(key) {
+    const parts = key.split('', 10);
+    parts[parts.length - 1] = parts[parts.length - 1].slice(0, 1);
+    return `${parts.join('/')}/${key}`;
+}
+function buildPublicFileBucketKey(key) {
     const parts = key.split('', 10);
     parts[parts.length - 1] = parts[parts.length - 1].slice(0, 1);
     return `${parts.join('/')}/${key}`;
