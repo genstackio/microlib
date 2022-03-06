@@ -368,6 +368,19 @@ const extensionMap = {
     'image/bmp': '.bmp',
     'image/tiff': '.tif',
     'application/octet-stream': '',
+    'application/json': '.json',
+    'text/javascript': '.js',
+    'text/css': '.css',
+    'text/csv': '.csv',
+    'application/pdf': '.pdf',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+    'application/vnd.ms-excel': '.xls',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+    'application/msword': '.doc',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+    'application/vnd.ms-powerpoint': '.ppt',
+    'application/rtf': '.rtf',
+
 }
 function computeExtensionFromContentType(type: string|undefined) {
     return extensionMap[type || ''] || '';
