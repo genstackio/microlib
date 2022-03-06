@@ -1,5 +1,4 @@
 import {replaceVars} from "./utils";
-import {s3} from "@ohoareau/aws";
 
 export const upper = () => v => `${v}`.toUpperCase();
 export const lower = () => v => `${v}`.toLowerCase();
