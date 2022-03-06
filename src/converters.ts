@@ -1,4 +1,5 @@
 import {replaceVars} from "./utils";
+import {s3} from "@ohoareau/aws";
 
 export const upper = () => v => `${v}`.toUpperCase();
 export const lower = () => v => `${v}`.toLowerCase();
@@ -144,6 +145,8 @@ export const css = ({bucket: archiveBucket, key: archiveKey, name: archiveName, 
                 case 'contentType': x['contentType'] = v['contentType']; break;
                 case 'fingerprint': x['fingerprint'] = v['fingerprint']; break;
                 case 'content': x['content'] = await s3.getFileContent(vv); break;
+                case 'contentAsBase64': x['contentAsBase64'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64'); break;
+                case 'contentAsBase64Url': x['contentAsBase64Url'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64url'); break;
                 case 'cdnUrl': x['cdnUrl'] = cdnObject ? await buildImageCdnUrl({...(cdnObject || {}), fingerprint: v['fingerprint']} as any, selection[k]) : undefined; break;
                 case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v) : (await s3.getFileViewUrl(vv)).viewUrl; break;
                 case 'urlInfos': x['urlInfos'] = await s3.getFileViewUrl(vv); break;
@@ -314,6 +317,8 @@ export const file = ({bucket: archiveBucket, key: archiveKey, name: archiveName,
                 case 'contentType': x['contentType'] = v['contentType']; break;
                 case 'fingerprint': x['fingerprint'] = v['fingerprint']; break;
                 case 'content': x['content'] = await s3.getFileContent(vv); break;
+                case 'contentAsBase64': x['contentAsBase64'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64'); break;
+                case 'contentAsBase64Url': x['contentAsBase64Url'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64url'); break;
                 case 'cdnUrl': x['cdnUrl'] = cdnObject ? await buildImageCdnUrl({...(cdnObject || {}), fingerprint: v['fingerprint']} as any, selection[k]) : undefined; break;
                 case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v) : (await s3.getFileViewUrl(vv)).viewUrl; break;
                 case 'urlInfos': x['urlInfos'] = await s3.getFileViewUrl(vv); break;
