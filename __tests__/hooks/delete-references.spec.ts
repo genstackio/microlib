@@ -95,7 +95,7 @@ describe('deleteReferences', () => {
                     offset: undefined,
                 }
             ],
-            '.'
+            './services/crud'
         );
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             2,
@@ -105,7 +105,7 @@ describe('deleteReferences', () => {
                     id: 'item-1',
                 }
             ],
-            '.'
+            './services/crud'
         );
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             3,
@@ -115,7 +115,7 @@ describe('deleteReferences', () => {
                     id: 'item-2',
                 }
             ],
-            '.'
+            './services/crud'
         );
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             4,
@@ -125,7 +125,7 @@ describe('deleteReferences', () => {
                     id: 'item-3',
                 }
             ],
-            '.'
+            './services/crud'
         );
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             5,
@@ -135,7 +135,7 @@ describe('deleteReferences', () => {
                     id: 'item-4',
                 }
             ],
-            '.'
+            './services/crud'
         );
         expect(callerMock.execute).toHaveBeenCalledTimes(5);
     });
