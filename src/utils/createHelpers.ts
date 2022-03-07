@@ -39,14 +39,20 @@ export function createHelpers(model, dir) {
         const call = async (name, ...args) => caller.execute(name, args, origDir);
         const updateReferences = async (result, query) => hook('@update-references', [result, query]);
         const deleteReferences = async (result, query) => hook('@delete-references', [result, query]);
-        const updateStats = async (result, query) => hook('@update-stats', [result, query]);
+        const updateStats = async (result, query, operation: string|undefined = undefined) => hook('@update-stats', [result, query, operation]);
         const lambdaEvent = async (arn, payload) => {
             return require('./services/aws/lambda').default.execute(arn, payload, {async: true})
         };
         const snsPublish = async (topic, message, attributes = {}) => {
             return require('./services/aws/sns').default.publish({message, attributes, topic})
         };
-        const event = async (detailType: string, result: any, query: any) => hook('@eventbridge/send', [result, query], {detailType});
+        const eventbridgeSend = async (detailType: string, result: any, query: any) => {
+            return hook('@eventbridge/send', [result, query], {detailType});
+        }
+        const event = async (detailType: string, result: any, query: any) => {
+            await updateStats(result, query, detailType);
+            await eventbridgeSend(detailType, result, query);
+        }
         const requires = async (query, mode = 'item') => hook('@requires', [query, mode]);
         const dynamics = async (result, query, mode = 'item') => hook('@dynamics', [result, query, mode]);
         const validate = async (query, required = true) => hook('@validate', query, {required});

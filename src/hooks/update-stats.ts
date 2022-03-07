@@ -5,13 +5,14 @@ import d from 'debug';
 const debugHookUpdateStats = d('micro:hooks:update-stats');
 
 // noinspection JSUnusedGlobalSymbols
-export default ({on, model: {statTargets = {}}, dir}) => async (result, query) => {
+export default ({on, model: {statTargets = {}}, dir}) => async (result, query, operation: string|undefined = undefined) => {
     const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
-    const toTrigger = computeToTrigger(on, statTargets);
+    const op = operation || on;
+    const toTrigger = computeToTrigger(op, statTargets);
 
     if (!toTrigger || !Object.keys(toTrigger).length) return result;
 
-    debugHookUpdateStats('to trigger %j', toTrigger);
+    debugHookUpdateStats('%s => to trigger %j', op, toTrigger);
 
     const report = await Promise.allSettled(Object.entries(toTrigger).map(async ([a, b]: [any, any]) => {
         return Promise.allSettled(Object.entries(b).map(async ([_, b2]: [any, any]) => {
@@ -21,7 +22,7 @@ export default ({on, model: {statTargets = {}}, dir}) => async (result, query) =
     }));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
 
-    debugHookUpdateStats('report %j', toTrigger);
+    debugHookUpdateStats('%s => report %j', op, toTrigger);
 
     return result;
 }
