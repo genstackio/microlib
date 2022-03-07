@@ -122,10 +122,10 @@ function computeUpdateCriteriaForTrigger(result: any, query: any, tracker: any) 
 
     const joinFieldName = join;
     const idFieldName = idField || 'id';
-    const fieldValue = result[idFieldName] || ((query || {})['oldData'] || {})[idFieldName];
+    const fieldValue = result[joinFieldName] || ((query || {})['oldData'] || {})[joinFieldName];
 
     if (!joinFieldName || (undefined === fieldValue)) return undefined;
-    return {[joinFieldName]: fieldValue};
+    return {[idFieldName]: fieldValue};
 }
 async function applyTrigger(result: any, query: any, name: string, tracker: any, call: Function) {
 

@@ -74,6 +74,7 @@ describe('updateStats', () => {
         const query = {
             oldData: {
                 id: 'aaaa-bbbb',
+                game: 'xxx',
                 y: 3,
             }
         }
@@ -88,7 +89,7 @@ describe('updateStats', () => {
             [
                 {
                     criteria: {
-                        game: 'aaaa-bbbb',
+                        id: 'xxx',
                     },
                     fields: ['cursor', 'id'],
                     limit: 500,
