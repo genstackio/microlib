@@ -50,7 +50,9 @@ export function createHelpers(model, dir) {
             return hook('@eventbridge/send', [result, query], {detailType});
         }
         const event = async (detailType: string, result: any, query: any) => {
-            await updateStats(result, query, detailType);
+            if ((detailType !== operation) && (detailType.slice(0, model.name.length + 1) === `${model.name}_`)) {
+                await updateStats(result, query, detailType.slice(model.name.length + 1));
+            }
             await eventbridgeSend(detailType, result, query);
         }
         const requires = async (query, mode = 'item') => hook('@requires', [query, mode]);
