@@ -5,7 +5,7 @@ const debugHookUpdateReferences = d('micro:hooks:update-references');
 
 // noinspection JSUnusedGlobalSymbols
 export default ({model: {referenceTargets = {}}, dir}) => async (result, query) => {
-    const call = async (name, ...args) => caller.execute(name, args, dir);
+    const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
     const changedFields = computeChangedFields(result, (query || {}).oldData);
     if (!changedFields || !Object.keys(changedFields).length) return result;
     const toTrigger = computeToTriggerFromChangedFields(changedFields, referenceTargets);

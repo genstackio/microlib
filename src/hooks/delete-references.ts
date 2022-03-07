@@ -5,7 +5,7 @@ const debugHookDeleteReferences = d('micro:hooks:delete-references');
 
 // noinspection JSUnusedGlobalSymbols
 export default ({model: {referenceTargets = {}}, dir}) => async (result, query) => {
-    const call = async (name, ...args) => caller.execute(name, args, dir);
+    const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
     const toTrigger = computeToTrigger(referenceTargets);
 
     if (!toTrigger || !toTrigger.trackers || !Object.keys(toTrigger.trackers).length) return result;

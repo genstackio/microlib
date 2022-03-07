@@ -6,7 +6,7 @@ const debugHookUpdateStats = d('micro:hooks:update-stats');
 
 // noinspection JSUnusedGlobalSymbols
 export default ({on, model: {statTargets = {}}, dir}) => async (result, query) => {
-    const call = async (name, ...args) => caller.execute(name, args, dir);
+    const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
     const toTrigger = computeToTrigger(on, statTargets);
 
     if (!toTrigger || !Object.keys(toTrigger).length) return result;
