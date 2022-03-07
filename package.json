@@ -28,7 +28,8 @@
         "bcryptjs": "^2.4.3",
         "currency-codes": "^2.1.0",
         "debug": "^4.3.2",
-        "uuid": "^7.0.3"
+        "uuid": "^7.0.3",
+        "mozjexl": "^1.1.6"
     },
     "peerDependencies": {
         "cors": "^2.8.5",
