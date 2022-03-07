@@ -100,7 +100,7 @@ describe('updateReferences', () => {
                     criteria: {
                         game: 'aaaa-bbbb',
                     },
-                    fields: ['cursor', 'game', 'id', 't', 'x'],
+                    fields: ['cursor', 'game', 'id'],
                     limit: 500,
                     offset: undefined,
                 }
@@ -113,8 +113,7 @@ describe('updateReferences', () => {
             [
                 {
                     data: {
-                        t: 'other',
-                        x: 12,
+                        game: 'aaaa-bbbb',
                     },
                     id: 'item-1',
                 }
@@ -127,8 +126,7 @@ describe('updateReferences', () => {
             [
                 {
                     data: {
-                        t: 'other',
-                        x: 12,
+                        game: 'aaaa-bbbb',
                     },
                     id: 'item-2',
                 }
@@ -141,13 +139,26 @@ describe('updateReferences', () => {
             [
                 {
                     data: {
-                        t: 'other',
+                        game: 'aaaa-bbbb',
                     },
                     id: 'item-3',
                 }
             ],
             './services/crud'
         );
-        expect(callerMock.execute).toHaveBeenCalledTimes(4);
+        expect(callerMock.execute).toHaveBeenNthCalledWith(
+            5,
+            'a_b_update',
+            [
+                {
+                    data: {
+                        game: 'aaaa-bbbb',
+                    },
+                    id: 'item-4',
+                }
+            ],
+            './services/crud'
+        );
+        expect(callerMock.execute).toHaveBeenCalledTimes(5);
     });
 });

@@ -66,11 +66,13 @@ function computeToTriggerFromChangedFields(changedFields: any, referenceTargets:
     }, {trackedFields: {}, trackers: {}} as any)
 }
 
-function computeUpdateDataForTrigger(result: any, tracker: any) {
-    return Object.entries(tracker.triggerFields).reduce((acc: any, [name, c]: [string, any]) => {
-        acc[name] = c.newValue;
-        return acc;
-    }, {} as any);
+function computeUpdateDataForTrigger(result: any, query: any, tracker: any) {
+    const joinFieldName = tracker.config['join'];
+    const idFieldName = tracker.config['idField'] || 'id';
+    const fieldValue = result[idFieldName] || ((query || {})['oldData'] || {})[idFieldName];
+
+    if (!joinFieldName || (undefined === fieldValue)) return undefined;
+    return {[joinFieldName]: fieldValue};
 }
 
 function computeUpdateCriteriaForTrigger(result: any, query: any, tracker: any) {
@@ -91,13 +93,13 @@ function computeUpdateFieldsForTrigger(criteria: any, data: any) {
 }
 async function applyTrigger(result: any, query: any, name: string, tracker: any, call: Function) {
     const updateCriteria = computeUpdateCriteriaForTrigger(result, query, tracker);
-    const updateData = computeUpdateDataForTrigger(result, tracker);
+    const updateData = computeUpdateDataForTrigger(result, query, tracker);
     const updateFields = computeUpdateFieldsForTrigger(updateCriteria, updateData);
 
     if (!updateCriteria) return; // unable to detect criteria to filter items
     if (!updateData || !Object.keys(updateData).length) return; // nothing to update
 
-    debugHookUpdateReferences('apply %j %j %j', updateCriteria, updateData, updateFields);
+    debugHookUpdateReferences('apply %s %j %j %j', name, updateCriteria, updateData, updateFields);
 
     try {
         let offset: any = undefined;
