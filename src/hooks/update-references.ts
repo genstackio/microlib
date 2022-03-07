@@ -4,7 +4,7 @@ import d from 'debug';
 const debugHookUpdateReferences = d('micro:hooks:update-references');
 
 // noinspection JSUnusedGlobalSymbols
-export default ({model: {referenceTargets = {}}, dir}) => async (result, query) => {
+export default ({o, model: {referenceTargets = {}}, dir}) => async (result, query) => {
     const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
     const changedFields = computeChangedFields(result, (query || {}).oldData);
     if (!changedFields || !Object.keys(changedFields).length) return result;
@@ -12,13 +12,13 @@ export default ({model: {referenceTargets = {}}, dir}) => async (result, query) 
 
     if (!toTrigger || !toTrigger.trackers || !Object.keys(toTrigger.trackers).length) return result;
 
-    debugHookUpdateReferences('changed %j', changedFields);
-    debugHookUpdateReferences('to trigger %j', toTrigger);
+    debugHookUpdateReferences('%s => changed %j', o, changedFields);
+    debugHookUpdateReferences('%s => to trigger %j', o, toTrigger);
 
     const report = await Promise.allSettled(Object.entries(toTrigger.trackers).map(async ([a, b]: [any, any]) => applyTrigger(result, query, a, b, call)));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
 
-    debugHookUpdateReferences('report %j', toTrigger);
+    debugHookUpdateReferences('%s => report %j', o, report);
 
     return result;
 }

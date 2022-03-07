@@ -4,18 +4,18 @@ import d from 'debug';
 const debugHookDeleteReferences = d('micro:hooks:delete-references');
 
 // noinspection JSUnusedGlobalSymbols
-export default ({model: {referenceTargets = {}}, dir}) => async (result, query) => {
+export default ({o, model: {referenceTargets = {}}, dir}) => async (result, query) => {
     const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
     const toTrigger = computeToTrigger(referenceTargets);
 
     if (!toTrigger || !toTrigger.trackers || !Object.keys(toTrigger.trackers).length) return result;
 
-    debugHookDeleteReferences('to trigger %j', toTrigger);
+    debugHookDeleteReferences('%s => to trigger %j', o, toTrigger);
 
     const report = await Promise.allSettled(Object.entries(toTrigger.trackers).map(async ([a, b]: [any, any]) => applyTrigger(result, query, a, b, call)));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
 
-    debugHookDeleteReferences('report %j', toTrigger);
+    debugHookDeleteReferences('%s => report %j', o, report);
 
     return result;
 }

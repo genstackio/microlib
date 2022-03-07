@@ -9,13 +9,13 @@ beforeEach(() => {
 describe('updateReferences', () => {
     it('execute with nothing', async () => {
         const model = {};
-        expect(await updateReferences({model, dir: '.'})({}, undefined)).toEqual({});
+        expect(await updateReferences({o: 'bla', model, dir: '.'})({}, undefined)).toEqual({});
     });
     it('execute with no trackers', async () => {
         const model = {
             referenceTargets: {},
         }
-        expect(await updateReferences({model, dir: '.'})({}, undefined)).toEqual({});
+        expect(await updateReferences({o: 'bla', model, dir: '.'})({}, undefined)).toEqual({});
     });
     it('execute with trackers', async () => {
         (callerMock.execute as jest.Mock).mockResolvedValueOnce({
@@ -91,7 +91,7 @@ describe('updateReferences', () => {
             t: 'other', // tracked + changed
             w: 'world', // untracked
         }
-        expect(await updateReferences({model, dir: '.'})(result, query)).toEqual(result);
+        expect(await updateReferences({o: 'bla', model, dir: '.'})(result, query)).toEqual(result);
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             1,
             'a_b_find',
