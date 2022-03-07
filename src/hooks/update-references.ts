@@ -1,4 +1,7 @@
 import caller from "../services/caller";
+import d from 'debug';
+
+const debugHookUpdateReferences = d('micro:hooks:update-references');
 
 // noinspection JSUnusedGlobalSymbols
 export default ({model: {referenceTargets = {}}, dir}) => async (result, query) => {
@@ -9,8 +12,13 @@ export default ({model: {referenceTargets = {}}, dir}) => async (result, query) 
 
     if (!toTrigger || !toTrigger.trackers || !Object.keys(toTrigger.trackers).length) return result;
 
+    debugHookUpdateReferences('changed %j', changedFields);
+    debugHookUpdateReferences('to trigger %j', toTrigger);
+
     const report = await Promise.allSettled(Object.entries(toTrigger.trackers).map(async ([a, b]: [any, any]) => applyTrigger(result, query, a, b, call)));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
+
+    debugHookUpdateReferences('report %j', toTrigger);
 
     return result;
 }
@@ -89,6 +97,8 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
     if (!updateCriteria) return; // unable to detect criteria to filter items
     if (!updateData || !Object.keys(updateData).length) return; // nothing to update
 
+    debugHookUpdateReferences('apply %j %j %j', updateCriteria, updateData, updateFields);
+
     try {
         let offset: any = undefined;
         let page: any = undefined;
@@ -102,7 +112,7 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
                 criteria: updateCriteria,
                 fields: updateFields,
             });
-            await Promise.all(((page || {}).items || []).map(async item => {
+            await Promise.allSettled(((page || {}).items || []).map(async item => {
                 const itemChangedData = computeChangedFields(updateData, item);
                 if (!itemChangedData || !Object.keys(itemChangedData).length) return;
                 const changedData = Object.entries(itemChangedData).reduce((acc: any, [name, values]: [string, any]) => {
@@ -110,10 +120,18 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
                     return acc;
                 }, {});
                 if (!changedData || !Object.keys(changedData).length) return;
-                return call(`${name}_update`, {
-                    id: item.id,
-                    data: changedData,
-                })
+                try {
+                    // noinspection UnnecessaryLocalVariableJS
+                    const rr = await call(`${name}_update`, {
+                        id: item.id,
+                        data: changedData,
+                    });
+                    // @todo log?
+                    return rr;
+                } catch (e: any) {
+                    // @todo log?
+                    throw e;
+                }
             }));
             offset = (page || {}).cursor;
             step++;

@@ -1,5 +1,8 @@
 import caller from "../services/caller";
 import evaluate from "../utils/evaluate";
+import d from 'debug';
+
+const debugHookUpdateStats = d('micro:hooks:update-stats');
 
 // noinspection JSUnusedGlobalSymbols
 export default ({on, model: {statTargets = {}}, dir}) => async (result, query) => {
@@ -8,6 +11,8 @@ export default ({on, model: {statTargets = {}}, dir}) => async (result, query) =
 
     if (!toTrigger || !Object.keys(toTrigger).length) return result;
 
+    debugHookUpdateStats('to trigger %j', toTrigger);
+
     const report = await Promise.allSettled(Object.entries(toTrigger).map(async ([a, b]: [any, any]) => {
         return Promise.allSettled(Object.entries(b).map(async ([_, b2]: [any, any]) => {
             if (!Object.keys(b2).length) return;
@@ -15,6 +20,8 @@ export default ({on, model: {statTargets = {}}, dir}) => async (result, query) =
         }));
     }));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
+
+    debugHookUpdateStats('report %j', toTrigger);
 
     return result;
 }
@@ -97,6 +104,7 @@ async function buildUpdaterForField(o: any, name: string, config: any, result: a
 async function computeUpdateDataForTrigger(result: any, query: any, tracker: any) {
     return Object.entries(tracker).reduce(async (acc: any, [n, t]: [string, any]) => {
         try {
+            // noinspection UnnecessaryLocalVariableJS
             const r = await buildUpdaterForField(await acc, n, t, result, query);
             return r;
         } catch (e: any) {
@@ -120,11 +128,14 @@ function computeUpdateCriteriaForTrigger(result: any, query: any, tracker: any) 
     return {[joinFieldName]: fieldValue};
 }
 async function applyTrigger(result: any, query: any, name: string, tracker: any, call: Function) {
+
     const updateCriteria = computeUpdateCriteriaForTrigger(result, query, tracker);
     const updateData = await computeUpdateDataForTrigger(result, query, tracker);
 
     if (!updateCriteria) return; // unable to detect criteria to filter items
     if (!updateData || !Object.keys(updateData).length) return; // nothing to update
+
+    debugHookUpdateStats('apply %j %j', updateCriteria, updateData);
 
     try {
         let offset: any = undefined;
@@ -139,11 +150,19 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
                 criteria: updateCriteria,
                 fields: ['cursor', 'id'],
             });
-            await Promise.all(((page || {}).items || []).map(async item => {
-                return call(`${name}_rawUpdate`, {
-                    id: item.id,
-                    data: updateData,
-                })
+            await Promise.allSettled(((page || {}).items || []).map(async item => {
+                try {
+                    // noinspection UnnecessaryLocalVariableJS
+                    const rr = await call(`${name}_rawUpdate`, {
+                        id: item.id,
+                        data: updateData,
+                    });
+                    // @todo log?
+                    return rr;
+                } catch (e: any) {
+                    // @todo log?
+                    throw e
+                }
             }));
             offset = (page || {}).cursor;
             step++;
