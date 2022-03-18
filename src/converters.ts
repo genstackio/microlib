@@ -1,4 +1,4 @@
-import {replaceVars} from "./utils";
+import {buildGqlSelectionInfos, replaceVars} from "./utils";
 
 export const upper = () => v => `${v}`.toUpperCase();
 export const lower = () => v => `${v}`.toLowerCase();
@@ -24,9 +24,7 @@ export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName
         archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
     }
 
-    const incomingName = (query?.aliases || {})[attribute] || attribute;
-    const selection = (query?.selections || {})[incomingName] || {};
-    const selected = Object.values((selection || {})['fields'] || []);
+    const [selection, selected] = buildGqlSelectionInfos(query, attribute);
     const s3 = require('@ohoareau/aws').s3;
     const cdnObject = (x.available && process.env.PUBLIC_IMAGE_BUCKET_NAME)
         ? {
@@ -110,9 +108,7 @@ export const css = ({bucket: archiveBucket, key: archiveKey, name: archiveName, 
         archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
     }
 
-    const incomingName = (query?.aliases || {})[attribute] || attribute;
-    const selection = (query?.selections || {})[incomingName] || {};
-    const selected = Object.values((selection || {})['fields'] || []);
+    const [selection, selected] = buildGqlSelectionInfos(query, attribute);
     const s3 = require('@ohoareau/aws').s3;
     const cdnObject = (x.available && process.env.PUBLIC_CSS_BUCKET_NAME)
         ? {
@@ -196,9 +192,7 @@ export const js = ({bucket: archiveBucket, key: archiveKey, name: archiveName, a
         archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
     }
 
-    const incomingName = (query?.aliases || {})[attribute] || attribute;
-    const selection = (query?.selections || {})[incomingName] || {};
-    const selected = Object.values((selection || {})['fields'] || []);
+    const [selection, selected] = buildGqlSelectionInfos(query, attribute);
     const s3 = require('@ohoareau/aws').s3;
     const cdnObject = (x.available && process.env.PUBLIC_JS_BUCKET_NAME)
         ? {
@@ -282,9 +276,7 @@ export const file = ({bucket: archiveBucket, key: archiveKey, name: archiveName,
         archiveName = archiveName ? replaceVars(archiveName, vars) : undefined;
     }
 
-    const incomingName = (query?.aliases || {})[attribute] || attribute;
-    const selection = (query?.selections || {})[incomingName] || {};
-    const selected = Object.values((selection || {})['fields'] || []);
+    const [selection, selected] = buildGqlSelectionInfos(query, attribute);
     const s3 = require('@ohoareau/aws').s3;
     const cdnObject = (x.available && process.env.PUBLIC_FILE_BUCKET_NAME)
         ? {

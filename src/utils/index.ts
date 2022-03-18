@@ -1,4 +1,5 @@
 export {default as buildAllowedTransitions} from './buildAllowedTransitions';
+export {default as buildGqlSelectionInfos} from './buildGqlSelectionInfos';
 export {default as computeConfig} from './computeConfig';
 export {default as createHelpers} from './createHelpers';
 export {default as findPlugin} from './findPlugin';
