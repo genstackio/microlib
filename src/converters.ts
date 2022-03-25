@@ -407,7 +407,7 @@ function buildPublicFileBucketKey(key) {
 }
 
 function buildImageCdnUrl({name = undefined, fingerprint}: {name?: string, fingerprint: string}, options = {} as {arguments?: any}) {
-    if (!process.env.IMAGE_CDN_URL_PATTERN) return undefined;
+    if (!process.env.IMAGE_CDN_UP) return undefined;
 
     const params = {} as {qs?: string, color?: string, filter?: string[], flip?: string, format?: string, preset?: string[], quality?: string, radius?: string, rotation?: string, size?: string, theme?: string, trim?: string};
 
@@ -427,7 +427,7 @@ function buildImageCdnUrl({name = undefined, fingerprint}: {name?: string, finge
     options.arguments?.theme && (params.theme = `${options.arguments?.theme}`);
     options.arguments?.trim && (params.trim = `${options.arguments?.trim}`);
 
-    const u = process.env.IMAGE_CDN_URL_PATTERN
+    const u = process.env.IMAGE_CDN_UP
         .replace('{{fingerprint}}', fingerprint)
         .replace('{{name}}', name || '')
         .replace('{{path}}', `${fingerprint}/${name}`)

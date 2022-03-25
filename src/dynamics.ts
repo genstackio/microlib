@@ -87,7 +87,7 @@ export const operation = ({operation, dir}) => async (data, query) => {
     return require('./services/caller').default.execute(operation, [{...query, ...data}], `${dir}/services/crud`);
 }
 export const pattern_url = (config: any) => {
-    let pattern = process.env[`${(config['pattern_url'] || '').toUpperCase()}_URL_PATTERN`] || undefined
+    let pattern = process.env[`${(config['pattern_url'] || '').toUpperCase()}_UP`] || undefined
     if (pattern) {
         if ('ms://' == pattern.slice(0, 5)) {
             const [microservice, ...others] = pattern.slice(5).split(/\//g);
