@@ -91,10 +91,10 @@ export const pattern_url = (config: any) => {
     if (pattern) {
         if ('ms://' == pattern.slice(0, 5)) {
             const [microservice, ...others] = pattern.slice(5).split(/\//g);
-            pattern = `${(process.env['MS_PROTOCOL_URL'] || '').replace('{{microservice}}', microservice)}${others.length ? '/' : ''}${others.join('/')}`;
+            pattern = `${(process.env['MS_PROTOCOL_URL'] || '').replace(/\{\{microservice\}\}/g, microservice)}${others.length ? '/' : ''}${others.join('/')}`;
         } else if ('msr://' == pattern.slice(0, 6)) {
             const [microservice, ...others] = pattern.slice(6).split(/\//g);
-            pattern = `${(process.env['MSR_PROTOCOL_URL'] || '').replace('{{microservice}}', microservice)}${others.length ? '/' : ''}${others.join('/')}`;
+            pattern = `${(process.env['MSR_PROTOCOL_URL'] || '').replace(/\{\{microservice\}\}/g, microservice)}${others.length ? '/' : ''}${others.join('/')}`;
         }
     }
     return completeDoc => {
