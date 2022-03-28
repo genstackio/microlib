@@ -148,7 +148,8 @@ function mutateCriteria(rawCriteria: any): any {
     return rawCriteria.map((c) => populateSearchIndexInputFromSearchQueryCriterium(c));
 }
 
-module.exports = (model: any, cfg: any) => {
+// noinspection JSUnusedGlobalSymbols
+export default (model: any, cfg: any) => {
     if (!cfg || !cfg.package) throw new Error(`Unspecified searchapi package in configuration of backend searchapi`);
     const {createEnvSdk} = require(cfg.package);
 
@@ -159,7 +160,6 @@ module.exports = (model: any, cfg: any) => {
         return sdk.searchIndexPage(index, query, 'string' === typeof offset ? parseInt(offset) : offset, limit, def, (!!sort && ('string' === typeof sort)) ? sort : undefined);
     }
 
-    // noinspection JSUnusedGlobalSymbols
     return {
         search,
     }
