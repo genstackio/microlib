@@ -1,6 +1,6 @@
 {
     "name": "@ohoareau/microlib",
-    "version": "0.16.12",
+    "version": "0.16.13",
     "license": "MIT",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
