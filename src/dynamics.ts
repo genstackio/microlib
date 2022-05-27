@@ -95,6 +95,12 @@ export const pattern_url = (config: any) => {
         } else if ('msr://' == pattern.slice(0, 6)) {
             const [microservice, ...others] = pattern.slice(6).split(/\//g);
             pattern = `${(process.env['MSR_PROTOCOL_URL'] || '').replace(/\{\{microservice\}\}/g, microservice)}${others.length ? '/' : ''}${others.join('/')}`;
+        } else if ('ws://' == pattern.slice(0, 5)) {
+            const [webservice, ...others] = pattern.slice(5).split(/\//g);
+            pattern = `${(process.env['WS_PROTOCOL_URL'] || '').replace(/\{\{webservice\}\}/g, webservice)}${others.length ? '/' : ''}${others.join('/')}`;
+        } else if ('wsr://' == pattern.slice(0, 6)) {
+            const [webservice, ...others] = pattern.slice(6).split(/\//g);
+            pattern = `${(process.env['WSR_PROTOCOL_URL'] || '').replace(/\{\{webservice\}\}/g, webservice)}${others.length ? '/' : ''}${others.join('/')}`;
         }
     }
     return completeDoc => {
