@@ -1,12 +1,15 @@
-const buildValueGenerator = ({type, config = {}}, dir): Function|undefined => {
+const buildValueGenerator = ({type, config = {}}: {type?: string, config?: any}, dir): Function|undefined => {
     let g;
-    if ('@' === type.substr(0, 1)) {
+    type = type || 'unknown';
+    if ('@' === type.slice(0, 1)) {
         g = require('../dynamics');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         g = require(`${dir}/dynamics`);
     }
-    return (g[type.replace(/-/g, '_')] || g.empty)({...config, dir});
+    const fn = g[type.replace(/-/g, '_')] || g.empty;
+    if (!fn) throw new Error(`Unknown generator '${type}'`);
+    return fn({...config, dir});
 };
 
 async function populateItem(result, query, defs, selectedFields, dir) {
