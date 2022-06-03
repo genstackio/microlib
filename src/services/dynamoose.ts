@@ -165,12 +165,16 @@ const applyModifiers = (q, modifiers) => modifiers.reduce((qq, m) => {
 export const applyQuerySort = (q: {ascending: Function, descending: Function}, direction: any): void => {
     if ('string' === typeof direction) {
         if (('descending' === direction) || ('ascending' === direction)) {
-            q[<string>direction]();
+            const sorter = q[<string>direction];
+            if (!sorter) throw new Error(`Sorting is not supported (probably a scan not a query)`);
+            sorter();
         } else {
             throw new Error(`Unsupported sort value: ${direction} (allowed: ascending,descending`);
         }
     } else if ('number' === typeof direction) {
-        q[(direction === -1) ? 'descending' : 'ascending']();
+        const sorter = q[(direction === -1) ? 'descending' : 'ascending'];
+        if (!sorter) throw new Error(`Sorting is not supported (probably a scan not a query)`);
+        sorter();
     } else if ('object' === typeof direction) {
         const k = Object.keys(direction).pop();
         if (!k) throw new Error(

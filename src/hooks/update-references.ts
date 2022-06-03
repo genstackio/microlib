@@ -50,7 +50,7 @@ function computeChangedFields(b: any, a: any = {}) {
 
 function computeToTriggerFromChangedFields(changedFields: any, referenceTargets: any) {
     return Object.entries(referenceTargets).reduce((acc: any, [name, rules]: [string, any]) => {
-        return Object.entries(rules).reduce((acc1: any, [_, {trackedFields, ...rule}]: [string, any]) => {
+        return Object.entries(rules).reduce((acc1, [_, {trackedFields, fieldTargets, ...rule }]: [any, any]) => {
             return Object.entries(changedFields).reduce((acc2: any, [name2, cf]: [string, any]) => {
                 if (!trackedFields[name2]) return acc2;
                 acc2.trackers = acc2.trackers || {};
@@ -59,6 +59,7 @@ function computeToTriggerFromChangedFields(changedFields: any, referenceTargets:
                 acc2.trackers[name] = acc2.trackers[name] || {};
                 acc2.trackers[name].triggerFields = acc2.trackers[name].triggerFields || {};
                 acc2.trackers[name].triggerFields[name2] = {...rule, oldValue: cf[1], newValue: cf[0]};
+                acc2.trackers[name].targetFields = {...(acc2.trackers[name].targetFields || {}), ...(fieldTargets || {})};
                 acc2.trackers[name].config = rule;
                 return acc2;
             }, acc1);
@@ -91,10 +92,26 @@ function computeUpdateFieldsForTrigger(criteria: any, data: any) {
     keyNames.sort();
     return keyNames;
 }
+function computeUpdateTrackedFieldsForTrigger(tracker) {
+    const targetMap = Object.entries(tracker.targetFields || {}).reduce((acc: any, [k, v]: [string, any]) => {
+        acc[v] = k;
+        return acc;
+    }, {} as any);
+    return Object.entries(tracker.triggerFields).reduce((acc: any, [k, {newValue}]: [string, any]) => {
+        acc.fields.push(k);
+        acc.values[k] = newValue;
+        const kk = targetMap[k];
+        if (kk) {
+            acc.targetValues[kk] = newValue;
+        }
+        return acc;
+    }, {fields: [], values: {}, targetValues: {}} as any);
+}
 async function applyTrigger(result: any, query: any, name: string, tracker: any, call: Function) {
     const updateCriteria = computeUpdateCriteriaForTrigger(result, query, tracker);
     const updateData = computeUpdateDataForTrigger(result, query, tracker);
     const updateFields = computeUpdateFieldsForTrigger(updateCriteria, updateData);
+    const updateTrackedFields = computeUpdateTrackedFieldsForTrigger(tracker);
 
     if (!updateCriteria) return; // unable to detect criteria to filter items
     if (!updateData || !Object.keys(updateData).length) return; // nothing to update
@@ -112,15 +129,12 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
                 offset,
                 limit,
                 criteria: updateCriteria,
-                fields: updateFields,
+                fields: [...updateFields, ...updateTrackedFields.fields],
             });
             await Promise.allSettled(((page || {}).items || []).map(async item => {
-                const itemChangedData = computeChangedFields(updateData, item);
+                const itemChangedData = computeChangedFields({...updateData, ...updateTrackedFields.targetValues}, item);
                 if (!itemChangedData || !Object.keys(itemChangedData).length) return;
-                const changedData = Object.entries(itemChangedData).reduce((acc: any, [name, values]: [string, any]) => {
-                    acc[name] = values[0];
-                    return acc;
-                }, {});
+                const changedData = updateData;
                 if (!changedData || !Object.keys(changedData).length) return;
                 try {
                     // noinspection UnnecessaryLocalVariableJS
