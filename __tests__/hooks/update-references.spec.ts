@@ -100,7 +100,7 @@ describe('updateReferences', () => {
                     criteria: {
                         game: 'aaaa-bbbb',
                     },
-                    fields: ['cursor', 'game', 'id'],
+                    fields: ['cursor', 'game', 'id', 'x', 't'],
                     limit: 500,
                     offset: undefined,
                 }
