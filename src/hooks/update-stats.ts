@@ -102,9 +102,31 @@ async function buildUpdaterForField(o: any, name: string, config: any, result: a
     return o;
 }
 
+function isValidForFilter(filter: any, result: any, query: any, tracker: any) {
+    const getFieldValue = xx => result[xx[0]] || ((query || {})['oldData'] || {})[xx[0]];
+    return Object.entries(filter).reduce((acc: boolean, [k, v]: [string, any]) => {
+        switch (k) {
+            case '$eq': return acc && (getFieldValue(v) === v[1]);
+            case '$ne': return acc && (getFieldValue(v) !== v[1]);
+            case '$lt': return acc && (getFieldValue(v) < v[1]);
+            case '$lte': return acc && (getFieldValue(v) <= v[1]);
+            case '$gt': return acc && (getFieldValue(v) > v[1]);
+            case '$gte': return acc && (getFieldValue(v) >= v[1]);
+            case '$in': return acc && ((v[1] || []).includes(getFieldValue(v)));
+            case '$nin': return acc && !((v[1] || []).includes(getFieldValue(v)));
+            case '$empty': return acc && ((undefined === getFieldValue(v)) || (null === getFieldValue(v)) || ('' === getFieldValue(v)));
+            case '$nonempty': return acc && ((undefined !== getFieldValue(v)) && (null !== getFieldValue(v)) && ('' !== getFieldValue(v)));
+            default: return acc && (result[k] === v);
+        }
+    }, false as true);
+}
 async function computeUpdateDataForTrigger(result: any, query: any, tracker: any) {
     return Object.entries(tracker).reduce(async (acc: any, [n, t]: [string, any]) => {
         try {
+            if (t && t.filters && Array.isArray(t.filters) && (0 < t.filters.length)) {
+                const found = t.filters.find(ff => isValidForFilter(ff, result, query, tracker));
+                if (!found) return await acc; // update not added
+            }
             // noinspection UnnecessaryLocalVariableJS
             const r = await buildUpdaterForField(await acc, n, t, result, query);
             return r;
