@@ -118,7 +118,7 @@ function isValidForFilter(filter: any, result: any, query: any, tracker: any) {
             case '$nonempty': return acc && ((undefined !== getFieldValue(v)) && (null !== getFieldValue(v)) && ('' !== getFieldValue(v)));
             default: return acc && (result[k] === v);
         }
-    }, false as true);
+    }, true as boolean);
 }
 async function computeUpdateDataForTrigger(result: any, query: any, tracker: any) {
     return Object.entries(tracker).reduce(async (acc: any, [n, t]: [string, any]) => {
