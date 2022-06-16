@@ -87,7 +87,8 @@ export const operation = ({operation, dir}) => async (data, query) => {
     return require('./services/caller').default.execute(operation, [{...query, ...data}], `${dir}/services/crud`);
 }
 export const pattern_url = (config: any) => {
-    let pattern = process.env[`${(config['pattern_url'] || '').toUpperCase()}_UP`] || undefined
+    const [rawPattern, extraUri = undefined]: [string, string?] = (config['pattern_url'] || '').split(':');
+    let pattern = process.env[`${rawPattern.toUpperCase()}_UP`] || undefined
     if (pattern) {
         if ('ms://' == pattern.slice(0, 5)) {
             const [microservice, ...others] = pattern.slice(5).split(/\//g);
@@ -105,6 +106,6 @@ export const pattern_url = (config: any) => {
     }
     return completeDoc => {
         if (!pattern) return undefined;
-        return replaceVars(pattern, completeDoc) || undefined;
+        return replaceVars(`${pattern}${extraUri || ''}`, completeDoc) || undefined;
     }
 }
