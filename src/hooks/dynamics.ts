@@ -33,9 +33,9 @@ export default ({model, dir}) => async (result, query, mode: string = 'item') =>
     const defs = model.dynamics || {};
     switch (mode) {
         case 'page':
-            selectedFields = query.selections?.items?.fields || Object.keys(model.dynamics || {});
-            realSelectedFields = query.selections?.items?.fields || [];
-            fieldsSelections = query.selections?.items?.selections || {};
+            selectedFields = (query.selections?.items ? query.selections!.items!.fields : (query.selections ? Object.keys(query.selection) : undefined)) || Object.keys(model.dynamics || {});
+            realSelectedFields = (query.selections?.items ? query.selections!.items!.fields : (query.selections ? Object.keys(query.selection) : undefined)) || [];
+            fieldsSelections = (query.selections?.items ? query.selections!.items!.selections : query.selections) || {};
             result.items = await Promise.all(result.items.map(item => populateItem({...item}, query, defs, selectedFields, realSelectedFields, fieldsSelections, dir)))
             break;
         default:

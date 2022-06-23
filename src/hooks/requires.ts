@@ -9,9 +9,9 @@ function buildFields(fields, model, all = {}) {
     return Object.keys(fields.reduce((acc, k) => {
         if (all[k]) return acc;
         acc[k] = true;
-        return {...acc, ...buildFields((model.requires || {})[k] || [], model, {...all, ...acc}).reduce((acc2, k2) => {
+        return buildFields((model.requires || {})[k] || [], model, {...all, ...acc}).reduce((acc2, k2) => {
             acc2[k2] = true;
             return acc2;
-        }, acc)};
+        }, acc);
     }, {} as any));
 }
