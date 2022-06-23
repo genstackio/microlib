@@ -1,4 +1,4 @@
-const buildValueGenerator = ({type, config = {}}: {type?: string, config?: any}, dir): Function|undefined => {
+const buildValueGenerator = ({type, config = {}, field, isFieldSelected, fieldSelections = {}}: {type?: string, config?: any, field: string, isFieldSelected: boolean, fieldSelections?: any}, dir): Function|undefined => {
     let g;
     type = type || 'unknown';
     if ('@' === type.slice(0, 1)) {
@@ -9,13 +9,13 @@ const buildValueGenerator = ({type, config = {}}: {type?: string, config?: any},
     }
     const fn = g[type.replace(/-/g, '_')] || g.empty;
     if (!fn) throw new Error(`Unknown generator '${type}'`);
-    return fn({...config, dir});
+    return fn({...config, field, isFieldSelected, fieldSelections, dir});
 };
 
-async function populateItem(result, query, defs, selectedFields, dir) {
+async function populateItem(result, query, defs, selectedFields, realSelectedFields, fieldsSelections, dir) {
     await Promise.all(selectedFields.map(async k => {
         if (!defs[k]) return;
-        const g = buildValueGenerator(<any>defs[k], dir);
+        const g = buildValueGenerator({...<any>defs[k], field: k, isFieldSelected: (realSelectedFields || []).includes(k), fieldSelections: (fieldsSelections || {})[k]}, dir);
         if (g) {
             result[k] = await g(result, query);
             query.resultAutoPopulated = query.resultAutoPopulated || {};
@@ -28,15 +28,19 @@ async function populateItem(result, query, defs, selectedFields, dir) {
 
 export default ({model, dir}) => async (result, query, mode: string = 'item') => {
     let selectedFields = (query.fields && query.fields.length) ? query.fields : Object.keys(model.dynamics || {});
+    let realSelectedFields = Object.keys(query.selections || {});
+    let fieldsSelections = query.selections || {};
     const defs = model.dynamics || {};
     switch (mode) {
         case 'page':
             selectedFields = query.selections?.items?.fields || Object.keys(model.dynamics || {});
-            result.items = await Promise.all(result.items.map(item => populateItem({...item}, query, defs, selectedFields, dir)))
+            realSelectedFields = query.selections?.items?.fields || [];
+            fieldsSelections = query.selections?.items?.selections || {};
+            result.items = await Promise.all(result.items.map(item => populateItem({...item}, query, defs, selectedFields, realSelectedFields, fieldsSelections, dir)))
             break;
         default:
         case 'item':
-            result = await populateItem(result, query, defs, selectedFields, dir)
+            result = await populateItem(result, query, defs, selectedFields, realSelectedFields, fieldsSelections, dir)
             break;
     }
     return result;
