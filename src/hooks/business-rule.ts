@@ -1,10 +1,10 @@
 import business from '../services/business';
 
 // noinspection JSUnusedGlobalSymbols
-export default ({rule, dir}) => async (a, b) => {
+export default ({rule, dir}) => async (a?: any, b?: any, c?: any) => {
     let query: any = a;
     let result: any = undefined;
-    let vars: any = {};
+    let vars: any = c || {};
     if (b) {
         query = b;
         result = a;
