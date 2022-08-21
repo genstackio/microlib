@@ -1,5 +1,4 @@
-import bcrypt from 'bcryptjs';
-import BadCredentialsError from '../errors/BadCredentialsError';
+import BadCredentialsError from '@ohoareau/errors/lib/BadCredentialsError';
 
 const jwtTokenDuration = parseInt(process.env.JWT_TOKEN_DURATION || '3600'); // 1h
 const jwtRefreshTokenDuration = parseInt(process.env.JWT_REFRESH_TOKEN_DURATION || `${7 * 24 * 3600}`); // 7d
@@ -30,7 +29,7 @@ const generateTokens = (data) => {
 
 const createAuthToken = async ({user, password, populate = undefined}) => {
     if (!user || !password || !user.password) throw new BadCredentialsError((user && user.username) || undefined, 'unknown user');
-    if (!await bcrypt.compareSync(password, user.password)) throw new BadCredentialsError(user.username, 'bad password');
+    if (!await require('bcryptjs').compareSync(password, user.password)) throw new BadCredentialsError(user.username, 'bad password');
     return generateTokensForUser(user, populate);
 };
 

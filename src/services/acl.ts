@@ -1,4 +1,4 @@
-import UnauthorizedError from "../errors/UnauthorizedError";
+import UnauthorizedError from "@ohoareau/errors/lib/UnauthorizedError";
 
 export default ({userRoleKey = 'role', permissions = {}}: {userRoleKey?: string, permissions?: any}) => {
     const getPermissions = async () => permissions;

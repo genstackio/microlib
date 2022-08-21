@@ -1,4 +1,4 @@
-import AuthorizeError from "../errors/AuthorizeError";
+import AuthorizeError from "@ohoareau/errors/lib/AuthorizeError";
 
 const buildAuthorizer = ({type, config = {}}, dir) => {
     let a;

@@ -1,4 +1,4 @@
-import ValidationError from '../errors/ValidationError';
+import ValidationError from '@ohoareau/errors/lib/ValidationError';
 
 const getValidator = (type, dir) => {
     let v;

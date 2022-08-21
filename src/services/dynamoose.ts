@@ -1,5 +1,5 @@
 import dynamoose from 'dynamoose';
-import DocumentNotFoundError from '../errors/DocumentNotFoundError';
+import DocumentNotFoundError from '@ohoareau/errors/lib/DocumentNotFoundError';
 import d from 'debug';
 
 const debugServiceDynamooseFind = d('micro:service:dynamoose:find');

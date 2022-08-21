@@ -1,6 +1,6 @@
 import auth from '../../src/services/auth';
 import bcrypt from 'bcryptjs';
-import BadCredentialsError from '../../src/errors/BadCredentialsError';
+import BadCredentialsError from '@ohoareau/errors/lib/BadCredentialsError';
 
 describe('createAuthToken', () => {
     it('password valid return token and refreshToken', async () => {
