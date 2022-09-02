@@ -11,10 +11,12 @@ const getValidator = (type, dir) => {
     return v[type] || v.unknown;
 };
 
-export default ({model: {fields = {}, privateFields = {}, requiredFields = {}, validators = {}}, required = true, dir}) => async data => {
+export default ({model: {fields = {}, privateFields = {}, requiredFields = {}, validators = {}}, create = true, dir}) => async data => {
+    const required = create;
     if (!data.data) data.data = {};
     if ('function' !== typeof data.data.hasOwnProperty) data.data = {...data.data};
     const localCtx = {data: data.contextData || {}};
+    !create && (localCtx['id'] = data.id);
     const errors = {};
     Object.keys(data.data).forEach(k => {
         if (!fields[k] || privateFields[k]) {

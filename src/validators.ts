@@ -47,10 +47,15 @@ export const unknown = () => ({test: () => false, message: () => `Unknown valida
 export const isbn = () => ({test: v => !!require('isbn3').parse(v), message: () => 'ISBN is not valid'});
 export const visaNumber = () => ({test: v => /^[0-9]+$/.test(v), message: () => 'Visa number is not valid'});
 export const jsonString = () => ({check: v => JSON.parse(v)});
-export const unique = ({type, hashKey, index, dir}) => ({check: async v => {
+export const unique = ({type, hashKey, index, dir}) => ({check: async (v, {id = undefined, idField = 'id'}: {id?: string, idField?: string} = {}) => {
     const caller = require('./services/caller').default;
-    const r = await caller.execute(`${type}_find`, {index, hashKey: [hashKey || index, v], limit: 1, fields: [hashKey || index]}, `${dir}/services/crud`);
+    const fields = [hashKey || index];
+    !fields.includes(idField) && fields.push(idField);
+    const r = await caller.execute(`${type}_find`, {index, hashKey: [hashKey || index, v], limit: 1, fields}, `${dir}/services/crud`);
     if (!r || !r.items || !r.items.length) return; // does not exist yet, everything is ok
+    const found = r.items[0];
+    if (!found) return; // strange
+    if (id && (id === found[idField])) return; // exist but object is the same (same id), so this is a silent update, no changes on this field
     throw new Error(`${type} already exist for ${hashKey || index} is equal to ${v}, restricted due to uniqueness constraint`);
 }});
 export const reference = ({type, localField, idField, targetIdField, fetchedFields = [], dir}) => {
