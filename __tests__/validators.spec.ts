@@ -1,3 +1,4 @@
+jest.mock('../src/services/caller');
 import * as validators from "../src/validators";
 
 const complexWorkflow1 = {
@@ -12,7 +13,11 @@ const complexWorkflow1 = {
     SUCCESS_ACK: ['ADMIN_CANCEL'],
     ADMIN_CANCEL: ['ADMIN_CANCELED'],
 };
+import caller from '../src/services/caller';
 
+beforeEach(() => {
+    jest.resetAllMocks();
+})
 describe('validators', () => {
     [
         ['year', 2020, {}, true, ''],
@@ -34,4 +39,40 @@ describe('validators', () => {
             })
         )
     ;
+
+    it('unique with none in db (create mode)', async () => {
+        const uniqueValidator = validators.unique({type: 'my_type', hashKey: 'id', index: undefined, dir: '/some/dir'});
+        (<jest.Mock>caller.execute).mockResolvedValue({items: []});
+        await expect(uniqueValidator.check('aaa')).resolves.toEqual(undefined);
+    });
+    it('unique with existing in db (create mode)', async () => {
+        const uniqueValidator = validators.unique({type: 'my_type', hashKey: 'id', index: undefined, dir: '/some/dir'});
+        (<jest.Mock>caller.execute).mockResolvedValue({
+            items: [{}]
+        });
+        await expect(uniqueValidator.check('aaa')).rejects.toThrowError(
+            new Error('my_type already exist for id is equal to aaa, restricted due to uniqueness constraint')
+        );
+    });
+    it('unique with none in db (update mode)', async () => {
+        const uniqueValidator = validators.unique({type: 'my_type', hashKey: 'id', index: undefined, dir: '/some/dir'});
+        (<jest.Mock>caller.execute).mockResolvedValue({items: []});
+        await expect(uniqueValidator.check('aaa', {id: 'someId'})).resolves.toEqual(undefined);
+    });
+    it('unique with existing in db (update mode) and not same', async () => {
+        const uniqueValidator = validators.unique({type: 'my_type', hashKey: 'id', index: undefined, dir: '/some/dir'});
+        (<jest.Mock>caller.execute).mockResolvedValue({
+            items: [{id: 'xxx'}]
+        });
+        await expect(uniqueValidator.check('aaa', {id: 'yyy'})).rejects.toThrowError(
+            new Error('my_type already exist for id is equal to aaa, restricted due to uniqueness constraint')
+        );
+    });
+    it('unique with existing in db (update mode) and same', async () => {
+        const uniqueValidator = validators.unique({type: 'my_type', hashKey: 'id', index: undefined, dir: '/some/dir'});
+        (<jest.Mock>caller.execute).mockResolvedValue({
+            items: [{id: 'xxx'}]
+        });
+        await expect(uniqueValidator.check('aaa', {id: 'xxx'})).resolves.toEqual(undefined);
+    });
 });
