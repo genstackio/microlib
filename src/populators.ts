@@ -86,3 +86,37 @@ export const dddddddd = () => () => {
     t.push(digits[Math.floor(Math.random() * digits.length)]);
     return t.join('');
 };
+
+export const period_date = config => {
+    const {
+        weekStartDate, weekEndDate, yearStartDate, yearEndDate, monthStartDate, monthEndDate, dayStartDate, dayEndDate,
+        hourStartDate, hourEndDate, quarterStartDate, quarterEndDate, biweekStartDate, biweekEndDate,
+        semesterStartDate, semesterEndDate, hourQuarterStartDate, hourQuarterEndDate,
+        buildDate,
+    } = require('./services/period');
+
+    const factories = {
+        WEEK: [weekStartDate, weekEndDate],
+        YEAR: [yearStartDate, yearEndDate],
+        MONTH: [monthStartDate, monthEndDate],
+        DAY: [dayStartDate, dayEndDate],
+        HOUR: [hourStartDate, hourEndDate],
+        QUARTER: [quarterStartDate, quarterEndDate],
+        BIWEEK: [biweekStartDate, biweekEndDate],
+        SEMESTER: [semesterStartDate, semesterEndDate],
+        HOUR_QUARTER: [hourQuarterStartDate, hourQuarterEndDate],
+    }
+
+    return query => {
+        const mode = (config || {}).mode;
+        const type = ((query || {}).data || {}).type;
+
+        const factory = (factories[type] || [undefined, undefined])['end' === mode ? 1 : 0];
+
+        if (!factory) throw new Error(`Unsupported period ${mode} date type '${type}'`);
+
+        const date = factory(buildDate((query || {}).data));
+
+        return (!date || !date.getTime) ? undefined : date.getTime();
+    };
+}
