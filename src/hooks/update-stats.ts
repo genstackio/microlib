@@ -1,6 +1,8 @@
 import caller from "../services/caller";
 import evaluate from "../utils/evaluate";
 import d from 'debug';
+import extractVariablePropertyNamesInExpression from "../utils/extractVariablePropertyNamesInExpression";
+import deduplicateAndSort from "../utils/deduplicateAndSort";
 
 const debugHookUpdateStats = d('micro:hooks:update-stats');
 
@@ -42,59 +44,77 @@ function convertLegacyValue(value: string) {
 }
 
 async function buildValue({value = undefined, type = 'float', round = undefined, min = undefined, max = undefined, ratio = undefined}: {value?: any, type?: string, round?: string|number, min?: number, max?: number, ratio?: number} = {}, result: any, query: any, defaultValue: any) {
-    if (undefined === value) return defaultValue;
-    if ('string' !== typeof value) return value;
+    if (undefined === value) return [defaultValue, []];
+    if ('string' !== typeof value) return [value, []];
     value = convertLegacyValue(value);
-    let r: any = await evaluate(value, {new: result || {}, old: query?.oldData || {}, data: query?.data || {}, user: query?.user || {}, query, result});
 
-    switch (type) {
-        case 'float': r = 'number' === typeof r ? r : parseFloat(r); break;
-        case 'integer': r = 'number' === typeof r ? r : parseInt(r); break;
-        case 'string': r = 'string' === typeof r ? r : String(r); break;
-        default: break;
-    }
-    if (undefined !== ratio) {
-        if (ratio < 0.00000001) {
-            r = 0.0;
-        } else {
-            r = r / ratio;
+    const valueBuilder = async (item: any = {}) => {
+        let r: any = await evaluate(value, {joined: item || {}, new: result || {}, old: query?.oldData || {}, data: query?.data || {}, user: query?.user || {}, query, result});
+
+        switch (type) {
+            case 'float': r = 'number' === typeof r ? r : parseFloat(r); break;
+            case 'integer': r = 'number' === typeof r ? r : parseInt(r); break;
+            case 'string': r = 'string' === typeof r ? r : String(r); break;
+            default: break;
         }
-    }
-    switch (round) {
-        case 'ceil': r = Math.ceil(r); break;
-        case 'floor': r = Math.floor(r); break;
-        case undefined: break;
-        default:
-            if ('number' === typeof round) {
-                r = Math.round(round);
+        if (undefined !== ratio) {
+            if (ratio < 0.00000001) {
+                r = 0.0;
             } else {
-                throw new Error(`Unsupported value rounder '${round}'`);
+                r = r / ratio;
             }
-            break;
+        }
+        switch (round) {
+            case 'ceil': r = Math.ceil(r); break;
+            case 'floor': r = Math.floor(r); break;
+            case undefined: break;
+            default:
+                if ('number' === typeof round) {
+                    r = Math.round(r * Math.pow(10, round)) / Math.pow(10, round);
+                } else {
+                    throw new Error(`Unsupported value rounder '${round}'`);
+                }
+                break;
+        }
+        if (undefined !== min) {
+            r = Math.min(r, min);
+        }
+        if (undefined !== max) {
+            r = Math.max(r, max);
+        }
+        return r;
     }
-    if (undefined !== min) {
-        r = Math.min(r, min);
-    }
-    if (undefined !== max) {
-        r = Math.max(r, max);
-    }
-    return r;
+    return (value.indexOf('joined.') >= 0) ? [valueBuilder, extractVariablePropertyNamesInExpression(value, 'joined')] : [await valueBuilder(), []];
 }
-async function buildUpdaterForField(o: any, name: string, config: any, result: any, query: any) {
+async function buildUpdaterForField(o: [any, Function[], string[]], name: string, config: any, result: any, query: any) {
     const action = ((config || {}).action || {});
     const actionType = action.type;
+    let v: any = undefined;
+    let extraItemFields: string[] = [];
     switch (actionType) {
         case '@inc':
-            o['$inc'] = o['$inc'] || {};
-            o['$inc'][name] = await buildValue(action.config, result, query, 1);
+            [v, extraItemFields] = await buildValue(action.config, result, query, 1);
+            if ('function' === typeof v) {
+                o[1].push(async (item) => ({'$inc': {[name]: await v(item)}}));
+            } else {
+                o[0]['$inc'] = o[0]['$inc'] || {};
+                o[0]['$inc'][name] = v;
+            }
+            extraItemFields && extraItemFields.length && (o[2] = [...o[2], ...extraItemFields]);
             break;
         case '@dec':
-            o['$dec'] = o['$dec'] || {};
-            o['$dec'][name] = await buildValue(action.config, result, query, 1);
+            [v, extraItemFields] = await buildValue(action.config, result, query, 1);
+            if ('function' === typeof v) {
+                o[1].push(async (item) => ({'$dec': {[name]: await v(item)}}));
+            } else {
+                o[0]['$dec'] = o[0]['$dec'] || {};
+                o[0]['$dec'][name] = v;
+            }
+            extraItemFields && extraItemFields.length && (o[2] = [...o[2], ...extraItemFields]);
             break;
         case '@clear':
-            o['$reset'] = o['$reset'] || [];
-            o['$reset'] = [...o['$reset'], name];
+            o[0]['$reset'] = o[0]['$reset'] || [];
+            o[0]['$reset'] = [...o[0]['$reset'], name];
             break;
         default:
             throw new Error(`Unsupported action type for field updater (stat): '${actionType}`);
@@ -120,8 +140,8 @@ function isValidForFilter(filter: any, result: any, query: any, tracker: any) {
         }
     }, true as boolean);
 }
-async function computeUpdateDataForTrigger(result: any, query: any, tracker: any) {
-    return Object.entries(tracker).reduce(async (acc: any, [n, t]: [string, any]) => {
+async function computeUpdateDataForTrigger(result: any, query: any, tracker: any): Promise<[{[key: string]: any}|((any) => {[key: string]: any}), string[]]> {
+    const [a, b, c] = await Object.entries(tracker).reduce(async (acc: any, [n, t]: [string, any]) => {
         try {
             if (t && t.filters && Array.isArray(t.filters) && (0 < t.filters.length)) {
                 const found = t.filters.find(ff => isValidForFilter(ff, result, query, tracker));
@@ -134,7 +154,34 @@ async function computeUpdateDataForTrigger(result: any, query: any, tracker: any
             console.error(e);
             throw e;
         }
-    }, Promise.resolve({}));
+    }, Promise.resolve([{}, [], []]));
+
+    const d = deduplicateAndSort(c);
+
+    if (!b || !b.length) return [a, d];
+
+    return [async function (item: any = {}) {
+        return b.reduce(async (acc, f) => {
+            const localUpdateData = await acc;
+            const resultUpdateData = await f(item);
+            return mergeUpdateData(resultUpdateData, localUpdateData);
+        }, Promise.resolve(a));
+    }, d];
+}
+
+function mergeUpdateData(a, b: any) {
+    return Object.entries(b).reduce((acc: any, [k, v]: [string, any]) => {
+        if (!acc.hasOwnProperty(k)) {
+            acc[k] = v;
+        } else {
+            if ('$' === k.slice(0, 1)) { // $inc / $dec / $reset / ...
+                acc[k] = {...acc[k], ...(v || {})};
+            } else { // others => field names, ex: propertyName1, propertyName2, ...
+                acc[k] = v;
+            }
+        }
+        return acc;
+    }, {...a});
 }
 
 function computeUpdateCriteriaForTrigger(result: any, query: any, tracker: any) {
@@ -153,10 +200,10 @@ function computeUpdateCriteriaForTrigger(result: any, query: any, tracker: any) 
 async function applyTrigger(result: any, query: any, name: string, tracker: any, call: Function) {
 
     const updateCriteria = computeUpdateCriteriaForTrigger(result, query, tracker);
-    const updateData = await computeUpdateDataForTrigger(result, query, tracker);
+    const [updateData, extraItemFields = []] = await computeUpdateDataForTrigger(result, query, tracker);
 
     if (!updateCriteria) return; // unable to detect criteria to filter items
-    if (!updateData || !Object.keys(updateData).length) return; // nothing to update
+    if (!updateData || (('function' !== typeof updateData) && !Object.keys(updateData).length)) return; // nothing to update
 
     debugHookUpdateStats('apply %j %j', updateCriteria, updateData);
 
@@ -171,14 +218,14 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
                 offset,
                 limit,
                 criteria: updateCriteria,
-                fields: ['cursor', 'id'],
+                fields: ['cursor', 'id', ...extraItemFields],
             });
             await Promise.allSettled(((page || {}).items || []).map(async item => {
                 try {
                     // noinspection UnnecessaryLocalVariableJS
                     const rr = await call(`${name}_rawUpdate`, {
                         id: item.id,
-                        data: updateData,
+                        data: ('function' === typeof updateData) ? await (updateData as any)(item) : updateData,
                     });
                     // @todo log?
                     return rr;

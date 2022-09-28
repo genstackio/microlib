@@ -1,6 +1,6 @@
 const testMock = jest.fn();
 jest.mock('../src/hooks/test', () => ({default: testMock}), {virtual: true});
-import {buildAllowedTransitions, createHelpers, isTransition} from '../src/utils';
+import {buildAllowedTransitions, createHelpers, isTransition, extractVariablePropertyNamesInExpression, deduplicateAndSort} from '../src/utils';
 
 beforeEach(() => {
     jest.resetAllMocks();
@@ -93,4 +93,54 @@ describe('buildAllowedTransitions', () => {
                 expect(buildAllowedTransitions(transitions, current, 'undefined')).toEqual(allowed);
             })
         )
+})
+
+describe('extractVariablePropertyNamesInExpression', () => {
+    [
+        [
+            'case #1',
+            '(new.paymentAmount / joined.ticketPriceAmount)', 'myvar', [],
+        ],
+        [
+            'case #2',
+            '(new.paymentAmount / joined.ticketPriceAmount)', 'joined', ['ticketPriceAmount'],
+        ],
+        [
+            'case #3',
+            '(new.paymentAmount / (joined.ticketPriceAmount * joined.plannedTickets)', 'joined', ['plannedTickets', 'ticketPriceAmount'],
+        ],
+        [
+            'case #4',
+            '(new.paymentAmount / (myvar.ticketPriceAmount * myvar.plannedTickets) + myvar.ticketPriceAmount', 'myvar', ['plannedTickets', 'ticketPriceAmount'],
+        ],
+    ]
+        .forEach(
+            ([name, s, propertyName, expected]: any) => it(name, () => {
+                expect(extractVariablePropertyNamesInExpression(s, propertyName)).toEqual(expected);
+            })
+        )
+    ;
+})
+
+describe('deduplicateAndSort', () => {
+    [
+        [
+            'case #1',
+            [], [],
+        ],
+        [
+            'case #2',
+            ['ticketPriceAmount'], ['ticketPriceAmount'],
+        ],
+        [
+            'case #3',
+            ['ticketPriceAmount', 'plannedTickets', 'ticketPriceAmount'], ['plannedTickets', 'ticketPriceAmount'],
+        ],
+    ]
+        .forEach(
+            ([name, items, expected]: any) => it(name, () => {
+                expect(deduplicateAndSort(items)).toEqual(expected);
+            })
+        )
+    ;
 })

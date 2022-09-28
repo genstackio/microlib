@@ -17,3 +17,5 @@ export {default as loadPlugin} from './loadPlugin';
 export {default as replaceFn} from './replaceFn';
 export {default as replaceVars} from './replaceVars';
 export {default as slugify} from './slugify';
+export {default as extractVariablePropertyNamesInExpression} from './extractVariablePropertyNamesInExpression'
+export {default as deduplicateAndSort} from './deduplicateAndSort'
