@@ -13,6 +13,10 @@ const buildPostEnhancer = ({type, config = {}}, dir) => {
     return g;
 };
 
+async function fetchPreset(type: string, code: string, options: {dir: string}) {
+    return require(`${options.dir}/services/presets`).fetchPreset(type, code, options);
+}
+
 // noinspection JSUnusedGlobalSymbols
 export default ({o, model: {enhancers = {}}, dir}) => async (result, query) => {
     const on = o.replace(/^.+_([^_]+)$/, '$1');
@@ -25,6 +29,7 @@ export default ({o, model: {enhancers = {}}, dir}) => async (result, query) => {
             o.replace(/_[^_]+$/, ''),
             result || {},
             (query.data || {}).presets,
+            async (type: string, code: string) => fetchPreset(type, code, {dir}),
             enhs,
             async (props) => buildPostEnhancer(props, dir),
             async (dsn, params = {}, options = {}) =>
