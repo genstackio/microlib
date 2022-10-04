@@ -26,7 +26,7 @@ export default ({o, model: {enhancers = {}}, dir}) => async (query) => {
         await presets.applyPresets(
             'pre',
             query,
-            o.replace(/_[^_]+$/, ''),
+            o.replace(/_[^_]+$/, '').split('_')[1],
             query.data || {},
             (query.data || {}).presets,
             async (type: string, code: string) => fetchPreset(type, code, {dir}),

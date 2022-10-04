@@ -4,7 +4,13 @@ async function applyPresets(phase, query, type, data, codes = [], fetchPreset, e
             (codes || []).map(async p => fetchPreset(type, p))
         )
     ).map(
-        x => (x.status === 'fulfilled') ? x.value : undefined
+        x => {
+            if (x.status === 'fulfilled') {
+                return x.value
+            }
+            console.error(`Unable to fetch one of the presets of type '${type}'`, x?.reason?.message);
+            return undefined;
+        }
     ).filter(x => !!x);
 
     const joins = {};
