@@ -17,7 +17,7 @@ async function applyPresets(phase, query, type, data, codes = [], fetchPreset, e
 
     const enhsBuilt = (await Promise.all(enhs.map(async enh => buildEnhancer('string' === typeof enh ? {type: enh, config: {}} : enh)))).filter(x => !!x && x.supports);
 
-    return presets.reduce(async (acc, p) => applyPreset(phase, query, type, await acc, p, enhsBuilt.filter(x => x.supports(p)), call, metas, joins), data);
+    return presets.reduce(async (acc, p) => applyPreset(phase, query, type, await acc, p, enhsBuilt.filter(x => x.supports((p || {}).parsedDefinition || {})), call, metas, joins), data);
 }
 
 async function applyPreset(phase, query, type, data, preset, enhsBuilt, call, metas, joins) {
