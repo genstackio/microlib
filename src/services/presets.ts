@@ -4,18 +4,18 @@ async function applyPresets(phase, query, type, data, codes = [], fetchPreset, e
             (codes || []).map(async p => fetchPreset(type, p))
         )
     ).map(
-        x => {
+        (x: any, index: number) => {
             if (x.status === 'fulfilled') {
                 return x.value
             }
-            console.error(`Unable to fetch one of the presets of type '${type}'`, x?.reason?.message);
+            console.error(`Unable to fetch presets of type '${type}' named '${codes[index]}'`, x?.reason?.message);
             return undefined;
         }
     ).filter(x => !!x);
 
     const joins = {};
 
-    const enhsBuilt = enhs.map(enh => buildEnhancer('string' === typeof enh ? {type: enh, config: {}} : enh)).filter(x => !!x && x.supports);
+    const enhsBuilt = (await Promise.all(enhs.map(async enh => buildEnhancer('string' === typeof enh ? {type: enh, config: {}} : enh)))).filter(x => !!x && x.supports);
 
     return presets.reduce(async (acc, p) => applyPreset(phase, query, type, await acc, p, enhsBuilt.filter(x => x.supports(p)), call, metas, joins), data);
 }
