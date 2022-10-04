@@ -69,6 +69,8 @@ export function createHelpers(model, dir) {
         const prepare = async query => hook('@prepare', query);
         const after = async (result, query) => hook('@after', [result, query]);
         const rule = async (name, a: any, b?: any, c?: any) => hook('@business-rule', [a, b, c], {rule: name});
+        const preEnhance = async query => hook('@pre-enhance', [query]);
+        const postEnhance = async (result, query) => hook('@post-enhance', [result, query]);
         const convert = async (result, query, mode = 'item') => hook('@convert', [result, query, mode]);
         const dispatch = async (result, query) => hook('@dispatch', [result, query]);
 
@@ -77,6 +79,7 @@ export function createHelpers(model, dir) {
             convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo,
             isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo,
             event, hook, call, lambdaEvent, snsPublish, updateReferences, deleteReferences, updateStats, rule,
+            postEnhance, preEnhance,
         };
     };
 }
