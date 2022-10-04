@@ -30,7 +30,7 @@ async function apply(types, data, def, processParametrized, ctx) {
                 if (ctx.processed[k]) return acc2;
                 if (def.hasOwnProperty(k)) {
                     if (isValueParametrized(def[k]) && !processParametrized) return acc2;
-                    if (!acc2.hasOwnProperty(k) || (undefined === acc2[k])) {
+                    if (undefined === acc2[k]) {
                         acc2[k] = await convertValue(await buildValue(def[k], acc2, def, ctx), k, type, ctx);
                     } else if (type === 'append') {
                         acc2[k] = [...acc2[k], ...await convertValue(await buildValue(def[k], acc2, def, ctx), k, type, ctx)];
