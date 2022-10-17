@@ -168,8 +168,11 @@ export default (model: any, cfg: any) => {
             throw new Error(`Unable to parse order definition: ${e.message}`);
         }
         const index = order?.index || '';
+        const typename = order?.typename || '';
         if (!index) throw new Error('No index specified for order');
-        return search({index, offset, limit, sort, query})
+        const r = await search({index, offset, limit, sort, query});
+        typename && r && r.items?.forEach(i => i.__typename && (i.__typename = typename));
+        return r;
     }
 
     return {
