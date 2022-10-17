@@ -171,7 +171,7 @@ export default (model: any, cfg: any) => {
         const typename = order?.typename || '';
         if (!index) throw new Error('No index specified for order');
         const r = await search({index, offset, limit, sort, query});
-        typename && r && r.items?.forEach(i => i.__typename && (i.__typename = typename));
+        typename && r && r.items?.forEach(i => !i.__typename && (i.__typename = typename));
         return r;
     }
 
