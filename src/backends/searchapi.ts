@@ -160,7 +160,20 @@ export default (model: any, cfg: any) => {
         return sdk.searchIndexPage(index, query, 'string' === typeof offset ? parseInt(offset) : offset, limit, def, (!!sort && ('string' === typeof sort)) ? sort : undefined);
     }
 
+    async function searchFromOrder({offset, limit, sort, order}) {
+        let query: any;
+        try {
+            query = JSON.parse(order?.definition || '{}') || {};
+        } catch (e: any) {
+            throw new Error(`Unable to parse order definition: ${e.message}`);
+        }
+        const index = order?.index || '';
+        if (!index) throw new Error('No index specified for order');
+        return search({index, offset, limit, sort, query})
+    }
+
     return {
         search,
+        searchFromOrder,
     }
 }
