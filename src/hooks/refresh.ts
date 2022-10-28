@@ -6,7 +6,9 @@ const buildValueGenerator = ({type, config = {}}, dir) => {
     } else {
         g = require(`${dir}/refreshers`);
     }
-    return (g[type.replace(/-/g, '_')] || g.empty)(config);
+    const fn = (g[type.replace(/-/g, '_')] || g.empty);
+    if (!fn) throw new Error(`Unknown refresher '${type}'`);
+    return fn(config);
 };
 
 export default ({model, dir}) => async data => {
@@ -15,8 +17,8 @@ export default ({model, dir}) => async data => {
         if (!data || !data.data || !data.data.hasOwnProperty(k)) return;
         await Promise.all((def as any[] || []).map(async (dd) => {
             dd = 'string' === typeof dd ? {field: dd} : dd;
-            !dd.type && (dd.type = `${model.name}_${dd}`);
             if (!dd['field']) return;
+            !dd.type && (dd.type = `${model.name}_${dd.field}`);
             const kk = dd['field'];
             const v = await buildValueGenerator(<any>dd, dir)(data[k], data);
             if ('**unchanged**' !== v) {
