@@ -68,6 +68,7 @@ export function createHelpers(model, dir) {
         const prepopulate = async (query, prefix = undefined) => hook('@prepopulate', query, {prefix});
         const prepare = async query => hook('@prepare', query);
         const after = async (result, query) => hook('@after', [result, query]);
+        const refresh = async query => hook('@refresh', query);
         const rule = async (name, a: any, b?: any, c?: any) => hook('@business-rule', [a, b, c], {rule: name});
         const preEnhance = async query => hook('@pre-enhance', [query]);
         const postEnhance = async (result, query) => hook('@post-enhance', [result, query]);
@@ -79,7 +80,7 @@ export function createHelpers(model, dir) {
             convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo,
             isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo,
             event, hook, call, lambdaEvent, snsPublish, updateReferences, deleteReferences, updateStats, rule,
-            postEnhance, preEnhance,
+            postEnhance, preEnhance, refresh,
         };
     };
 }
