@@ -20,7 +20,7 @@ export default ({model, dir}) => async data => {
             if (!dd['field']) return;
             !dd.type && (dd.type = `${model.name}_${dd.field}`);
             const kk = dd['field'];
-            const v = await buildValueGenerator(<any>dd, dir)(data[k], data);
+            const v = await buildValueGenerator(<any>dd, dir)(data.data[k], data);
             if ('**unchanged**' !== v) {
                 if ('**clear**' === v) {
                     data.data[kk] = undefined;
