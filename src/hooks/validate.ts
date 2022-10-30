@@ -11,7 +11,7 @@ const getValidator = (type, dir) => {
     return v[type] || v.unknown;
 };
 
-export default ({model: {fields = {}, privateFields = {}, requiredFields = {}, validators = {}}, create = true, dir}) => async data => {
+export default ({model: {fields = {}, privateFields = {}, requiredFields = {}, onceFields = {}, validators = {}}, create = true, dir}) => async data => {
     const required = create;
     if (!data.data) data.data = {};
     if ('function' !== typeof data.data.hasOwnProperty) data.data = {...data.data};
@@ -37,6 +37,13 @@ export default ({model: {fields = {}, privateFields = {}, requiredFields = {}, v
         if (data.data.hasOwnProperty(k) && ((undefined === data.data[k]) || (null === data.data[k]) || ('**clear**' === data.data[k]))) {
             if (!errors[k]) errors[k] = [];
             errors[k].push(new Error('Field is required'));
+        }
+    });
+    // this third test is enabled only for update operations
+    !create && Object.keys(onceFields).forEach(k => {
+        if (data.data.hasOwnProperty(k) && (data.oldData && data.oldData.hasOwnProperty(k))) {
+            if (!errors[k]) errors[k] = [];
+            errors[k].push(new Error('Field is not updatable when a value has already been set'));
         }
     });
     await Promise.all(Object.entries(data.data).map(async ([k, v]) => {
