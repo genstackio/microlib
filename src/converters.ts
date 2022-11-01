@@ -312,7 +312,7 @@ export const jsonFile = ({bucket: archiveBucket, key: archiveKey, name: archiveN
                 case 'contentAsBase64Url': x['contentAsBase64Url'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64url'); break;
                 case 'contentAsJson':
                     try {
-                        x['contentAsJson'] = JSON.parse(await s3.fromJsonFile(vv.bucket, vv.key));
+                        x['contentAsJson'] = await s3.fromJsonFile(vv.bucket, vv.key);
                     } catch(e2: any) {
                         x['contentAsJson'] = {status: 'error', message: e2.message};
                     }
@@ -403,7 +403,7 @@ export const file = ({bucket: archiveBucket, key: archiveKey, name: archiveName,
                 case 'contentAsBase64Url': x['contentAsBase64Url'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64url'); break;
                 case 'contentAsJson':
                     try {
-                        x['contentAsJson'] = JSON.parse(await s3.fromJsonFile(vv.bucket, vv.key));
+                        x['contentAsJson'] = await s3.fromJsonFile(vv.bucket, vv.key);
                     } catch(e2: any) {
                         x['contentAsJson'] = {status: 'error', message: e2.message};
                     }
