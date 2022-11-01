@@ -32,6 +32,7 @@ export const file = ({bucket, key, name, contentType, algorithm = 'sha256'}) => 
 export const image = file;
 export const css = file;
 export const js = file;
+export const jsonFile = file;
 
 export const list = () => v => {
     // for now, only array of STRINGs
