@@ -6,11 +6,14 @@ async function save({bucket, key, content, contentType, fingerprint, name}: {buc
 }
 
 async function saveFrom(from: any, {bucket, key, contentType, name, algorithm}) {
+    const {bucket: origBucket, key: origKey} = from || {}; // if origin is s3 bucket file, we need to avoid to rewrite the file if the target is the same bucket/key
     const {content, contentType: detectedContentType} = await fetcher.fetch(from);
     contentType = contentType || detectedContentType;
     const fingerprint = await computeContentFingerprint(content, {algorithm});
     const to = {bucket, key, contentType, fingerprint, name};
-    await save({content, ...to});
+    if (!origBucket || !origKey || (bucket !== origBucket) || (key !== origKey)) {
+        await save({content, ...to});
+    }
     return to;
 }
 
