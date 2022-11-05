@@ -4,13 +4,13 @@ import d from 'debug';
 const debugHookPrefetch = d('micro:hooks:prefetch');
 
 // noinspection JSUnusedGlobalSymbols
-export default config => async query => {
+export default config => async (query, mode: string = 'all') => {
     let fields = Object.keys({
-        ...(await buildFieldsFromRequires(config, query)),
-        ...(await buildFieldsFromPrefetchs(config, query))
+        ...((('all' === mode) || ('requires-only' === mode)) ? await buildFieldsFromRequires(config, query) : {}),
+        ...((('all' === mode) || ('prefetchs-only' === mode)) ? await buildFieldsFromPrefetchs(config, query) : {})
     });
 
-    debugHookPrefetch('need to prefetch %j', fields);
+    debugHookPrefetch("for prefetch mode '%s', need to prefetch %j", mode, fields);
 
     if (!fields.length) return query;
 

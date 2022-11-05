@@ -59,7 +59,7 @@ export function createHelpers(model, dir) {
         const dynamics = async (result, query, mode = 'item') => hook('@dynamics', [result, query, mode]);
         const validate = async (query, create = true) => hook('@validate', query, {create});
         const authorize = async (query) => hook('@authorize', query);
-        const prefetch = async query => hook('@prefetch', query);
+        const prefetch = async (query, mode?: string) => hook('@prefetch', [query, mode]);
         const transform = async query => hook('@transform', query);
         const pretransform = async query => hook('@pretransform', query);
         const mutate = async (query, type, config = {}) => hook('@mutate', query, {type, config});
