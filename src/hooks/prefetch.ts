@@ -1,7 +1,7 @@
 import caller from '../services/caller';
 import d from 'debug';
 
-const debugHookPrefetch = d('micro:hooks:update-stats');
+const debugHookPrefetch = d('micro:hooks:prefetch');
 
 // noinspection JSUnusedGlobalSymbols
 export default config => async query => {
