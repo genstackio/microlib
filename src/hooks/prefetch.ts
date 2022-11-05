@@ -19,7 +19,7 @@ export default config => async (query, mode: string = 'all') => {
     let need = true;
 
     if (query.oldData) need = !!fields.find(f => undefined === query.oldData[f]);
-    if (need) query.oldData = await caller.execute(`${name}_get`, {id: query.id, fields}, `${dir}/services/crud`);
+    if (need && query.id) query.oldData = await caller.execute(`${name}_get`, {id: query.id, fields}, `${dir}/services/crud`);
 
     return query;
 }
