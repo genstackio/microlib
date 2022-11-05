@@ -1,6 +1,12 @@
 // noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 export default ({model}) => async (query, mode: string = 'item') => {
-    const selectedFields = (query.fields && query.fields.length) ? query.fields : Object.keys(model.dynamics || {});
+    let selectedFields = (query.fields && query.fields.length) ? query.fields : [];
+    if ('page' === mode) {
+        selectedFields = [...selectedFields, ...(query?.selections?.items?.fields || [])];
+    }
+    if (!selectedFields.length) selectedFields = Object.keys(model.dynamics || {});
+    selectedFields = Object.keys(selectedFields.reduce((acc, k) => Object.assign(acc, {[k]: true}), {} as any));
+    selectedFields = selectedFields.sort();
     query.fields = buildFields(selectedFields, model);
     return query;
 }
