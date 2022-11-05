@@ -32,7 +32,6 @@ async function buildFieldsFromRequires({model: {requires = {}}}, query: any) {
         return (requires[k] || []).reduce((acc2, kk) => Object.assign(acc2, {[kk]: true}), acc);
     }, {} as any);
 }
-
 // noinspection JSUnusedLocalSymbols
 async function buildFieldsFromPrefetchs({model: {prefetchs = {}}, operationName}, query: any) {
     if (!prefetchs || !prefetchs[operationName]) return {};
