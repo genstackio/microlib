@@ -25,6 +25,7 @@
         "@ohoareau/aws": "^0.2.0",
         "@ohoareau/build-package": "^0.2.1",
         "@ohoareau/errors": "^0.2.0",
+        "@genstackio/auth-jwt": "^0.1.0",
         "debug": "^4.3.4"
     },
     "peerDependencies": {

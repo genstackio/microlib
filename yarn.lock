@@ -489,6 +489,13 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@genstackio/auth-jwt@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@genstackio/auth-jwt/-/auth-jwt-0.1.0.tgz#6602a6e1df17b38c8455af6d59192ddbd91cd63e"
+  integrity sha512-UIzmURdPkonwsbjX9x59R1NAwaes55kGv6WjFnrUb3cLKuXENVb26NHQW6gTGr4LM5OQ4uffC+6V8itnZpEzKQ==
+  dependencies:
+    "@ohoareau/errors" "^0.2.0"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
