@@ -450,8 +450,8 @@ export const file = ({bucket: archiveBucket, key: archiveKey, name: archiveName,
 
 function buildScreenshotInfos(vars: any, v: any, kind: string, key: string, mode: string, format: string = 'png') {
     return {
-        url: buildUrlFromPattern(`[[process.env.SCREENSHOT_API_ENDPOINT]]/${kind}/${key}/${mode}/${mode}.${format}`, vars, v),
-        fullscreenUrl: buildUrlFromPattern(`[[process.env.SCREENSHOT_API_ENDPOINT]]/${kind}/${key}/${mode}/${mode}-fullscreen.${format}?full`, vars, v),
+        url: buildUrlFromPattern(`[[process.env.API_SCREENSHOT_ENDPOINT]]/${kind}/${key}/${mode}/${mode}.${format}`, vars, v),
+        fullscreenUrl: buildUrlFromPattern(`[[process.env.API_SCREENSHOT_ENDPOINT]]/${kind}/${key}/${mode}/${mode}-fullscreen.${format}?full`, vars, v),
     }
 }
 export const screenshots = ({kind, key, format, attribute}) => async (v, result, query) => {
@@ -466,11 +466,11 @@ export const screenshots = ({kind, key, format, attribute}) => async (v, result,
 
 function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any) {
     dynamicVars = {
-        extension: computeExtensionFromContentType(dynamicVars['contentType']),
-        ...dynamicVars,
+        extension: computeExtensionFromContentType((dynamicVars || {})['contentType']),
+        ...(dynamicVars || {}),
     };
     pattern = replaceVars(pattern, vars);
-    return replaceVars(pattern, dynamicVars, '\\<\\<', '\\>\\>');
+    return replaceVars(pattern, dynamicVars || {}, '\\<\\<', '\\>\\>');
 }
 const extensionMap = {
     'image/png': '.png',
