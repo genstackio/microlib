@@ -448,6 +448,22 @@ export const file = ({bucket: archiveBucket, key: archiveKey, name: archiveName,
     return x;
 }
 
+function buildScreenshotInfos(vars: any, v: any, kind: string, key: string, mode: string, format: string = 'png') {
+    return {
+        url: buildUrlFromPattern(`[[process.env.SCREENSHOT_API_ENDPOINT]]/${kind}/${key}/${mode}/${mode}.${format}`, vars, v),
+        fullscreenUrl: buildUrlFromPattern(`[[process.env.SCREENSHOT_API_ENDPOINT]]/${kind}/${key}/${mode}/${mode}-fullscreen.${format}?full`, vars, v),
+    }
+}
+export const screenshots = ({kind, key, format, attribute}) => async (v, result, query) => {
+    const x = {};
+    const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
+    const [_, selected] = buildGqlSelectionInfos(query, attribute);
+    await Promise.all(selected.map(async k => {
+        x[k] = buildScreenshotInfos(vars, v, kind, key, k, format);
+    }));
+    return x;
+}
+
 function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any) {
     dynamicVars = {
         extension: computeExtensionFromContentType(dynamicVars['contentType']),
