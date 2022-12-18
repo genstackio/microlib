@@ -1,5 +1,7 @@
 import formatters from './formatters';
 import d from 'debug';
+import {mError} from "./m";
+export * from './manager';
 // noinspection JSUnusedGlobalSymbols
 export {createHelpers as helpers} from './utils';
 
@@ -43,6 +45,7 @@ export const micro = (ms: any[] = [], ems: any[] = [], fn: Function|undefined, o
             try {
                 await apply(fn ? [...ms, async (req, res) => res.send(await fn(req))] : ms, [req, res]);
             } catch (e: any) {
+                await mError(e, {data: {event, context}})
                 debugException('%j', e)
                 await apply([...ems, async e => { throw e; }], [e, req, res]);
             }
@@ -51,6 +54,7 @@ export const micro = (ms: any[] = [], ems: any[] = [], fn: Function|undefined, o
             debugResult('%j', x);
             return x;
         } catch (e: any) {
+            await mError(e, {data: {event, context}})
             if (context?.throwError) throw e;
             debugException('%j', e);
             const x = {statusCode: 500, body: JSON.stringify({status: 'error', message: e.message})};
@@ -59,5 +63,7 @@ export const micro = (ms: any[] = [], ems: any[] = [], fn: Function|undefined, o
         }
     }
 ;
+
+export * from './types';
 
 export default micro

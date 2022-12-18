@@ -20,7 +20,7 @@ export const service = ({name, method}, {dir})  => async ({req}) => {
 export const acl = ({acls})  => async ({req}) => {
     try {
         const s = await require('./services/acl').default(acls);
-        if (!s.test(req)) {
+        if (!(await s.test(req))) {
             return {authorized: false, status: 'error', reason: 'not allowed'};
         }
         return {status: 'allowed', authorized: true};

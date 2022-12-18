@@ -1,5 +1,6 @@
 import caller from "../services/caller";
 import d from 'debug';
+import {mHookError} from "../m";
 
 const debugHookDeleteReferences = d('micro:hooks:delete-references');
 
@@ -69,14 +70,12 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
             });
             await Promise.allSettled(((page || {}).items || []).map(async item => {
                 try {
-                    // noinspection UnnecessaryLocalVariableJS
-                    const rr = await call(`${name}_delete`, {
+                    // keep the await
+                    return await call(`${name}_delete`, {
                         id: item.id,
                     });
-                    // @todo log ?
-                    return rr;
                 } catch (e: any) {
-                    // @todo log?
+                    await mHookError(e, 'delete-references', {data: {item, name, offset, limit, deleteFields, deleteCriteria, maxSteps, page, step, result, tracker}})
                     throw e;
                 }
             }));
@@ -88,10 +87,10 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
             throw new Error(`There was more than ${maxSteps} iteration of ${limit} items to process, aborting`);
         }
     } catch (e: any) {
-        console.error('Delete references FAILED', {name, tracker}, e);
+        await mHookError(e, 'delete-references', {data: {name, tracker}});
     }
 }
 
 async function processTriggerError(report: any) {
-    console.error('Delete references trigger ERROR', JSON.stringify(report, null, 4));
+    await mHookError(new Error('Delete references trigger error'), 'delete-references', {data: {report}});
 }

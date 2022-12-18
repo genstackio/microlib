@@ -1,5 +1,6 @@
 import caller from "../services/caller";
 import d from 'debug';
+import {mHookError} from "../m";
 
 const debugHookUpdateReferences = d('micro:hooks:update-references');
 
@@ -137,15 +138,13 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
                 const changedData = updateData;
                 if (!changedData || !Object.keys(changedData).length) return;
                 try {
-                    // noinspection UnnecessaryLocalVariableJS
-                    const rr = await call(`${name}_update`, {
+                    // keep the await
+                    return await call(`${name}_update`, {
                         id: item.id,
                         data: changedData,
                     });
-                    // @todo log?
-                    return rr;
                 } catch (e: any) {
-                    // @todo log?
+                    await mHookError(e, 'update-references', {data: {item, name, changedData, offset, limit, updateFields, updateCriteria, maxSteps, page, step, result, tracker}})
                     throw e;
                 }
             }));
@@ -157,10 +156,10 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
             throw new Error(`There was more than ${maxSteps} iteration of ${limit} items to process, aborting`);
         }
     } catch (e: any) {
-        console.error('Update references FAILED', {name, tracker}, e);
+        await mHookError(e, 'update-references', {data: {name, result, tracker}})
     }
 }
 
 async function processTriggerError(report: any) {
-    console.error('Update references trigger ERROR', JSON.stringify(report, null, 4));
+    await mHookError(new Error('Update references trigger error'), 'update-references', {data: {report}})
 }

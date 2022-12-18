@@ -1,4 +1,5 @@
 import {buildGqlSelectionInfos, replaceVars} from "./utils";
+import {mConverterError} from "./m";
 
 export const upper = () => v => `${v}`.toUpperCase();
 export const lower = () => v => `${v}`.toLowerCase();
@@ -314,6 +315,7 @@ export const jsonFile = ({bucket: archiveBucket, key: archiveKey, name: archiveN
                     try {
                         x['contentAsJson'] = await s3.fromJsonFile(vv.bucket, vv.key);
                     } catch(e2: any) {
+                        await mConverterError(e2, 'jsonFile', {data: {source: 's3', format: 'json', bucket: vv.bucket, key: vv.key}});
                         x['contentAsJson'] = {status: 'error', message: e2.message};
                     }
                     break;
@@ -405,6 +407,7 @@ export const file = ({bucket: archiveBucket, key: archiveKey, name: archiveName,
                     try {
                         x['contentAsJson'] = await s3.fromJsonFile(vv.bucket, vv.key);
                     } catch(e2: any) {
+                        await mConverterError(e2, 'file', {data: {source: 's3', format: 'json', bucket: vv.bucket, key: vv.key}});
                         x['contentAsJson'] = {status: 'error', message: e2.message};
                     }
                     break;

@@ -1,3 +1,5 @@
+import {mBusinessRuleError} from '../m';
+
 const getBusinessRule = (name: string, dir: string|undefined = undefined) => {
     let t: any = undefined;
     if ('@' === name.slice(0, 1)) {
@@ -19,7 +21,7 @@ async function apply(name: string, vars: any = {}, query: any = undefined, resul
         }
         await br(vars, query, result);
     } catch (e) {
-        console.error('business-rule', name, e, vars);
+        await mBusinessRuleError(e, name, vars, query, result);
         if (failOnError) throw e;
     }
 }

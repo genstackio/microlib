@@ -3,6 +3,7 @@ import evaluate from "../utils/evaluate";
 import d from 'debug';
 import extractVariablePropertyNamesInExpression from "../utils/extractVariablePropertyNamesInExpression";
 import deduplicateAndSort from "../utils/deduplicateAndSort";
+import {mHookError} from "../m";
 
 const debugHookUpdateStats = d('micro:hooks:update-stats');
 
@@ -122,6 +123,7 @@ async function buildUpdaterForField(o: [any, Function[], string[]], name: string
     return o;
 }
 
+// noinspection JSUnusedLocalSymbols
 function isValidForFilter(filter: any, result: any, query: any, tracker: any) {
     const getFieldValue = xx => result[xx[0]] || ((query || {})['oldData'] || {})[xx[0]];
     return Object.entries(filter).reduce((acc: boolean, [k, v]: [string, any]) => {
@@ -151,7 +153,7 @@ async function computeUpdateDataForTrigger(result: any, query: any, tracker: any
             const r = await buildUpdaterForField(await acc, n, t, result, query);
             return r;
         } catch (e: any) {
-            console.error(e);
+            await mHookError(e, 'update-stats', {data: {tracker, result, id: (query || {}).id, data: (query || {}).data}});
             throw e;
         }
     }, Promise.resolve([{}, [], []]));
@@ -222,15 +224,13 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
             });
             await Promise.allSettled(((page || {}).items || []).map(async item => {
                 try {
-                    // noinspection UnnecessaryLocalVariableJS
-                    const rr = await call(`${name}_rawUpdate`, {
+                    // keep the await
+                    return await call(`${name}_rawUpdate`, {
                         id: item.id,
                         data: ('function' === typeof updateData) ? await (updateData as any)(item) : updateData,
                     });
-                    // @todo log?
-                    return rr;
                 } catch (e: any) {
-                    // @todo log?
+                    await mHookError(e, 'update-stats', {data: {item, name, offset, limit, updateCriteria, maxSteps, page, step, result, tracker}})
                     throw e
                 }
             }));
@@ -242,10 +242,10 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
             throw new Error(`There was more than ${maxSteps} iteration of ${limit} items to process, aborting`);
         }
     } catch (e: any) {
-        console.error('Update stats FAILED', {name, tracker}, e);
+        await mHookError(e, 'update-stats', {data: {name, result, tracker}})
     }
 }
 
 async function processTriggerError(report: any) {
-    console.error('Update stats trigger ERROR', JSON.stringify(report, null, 4));
+    await mHookError(new Error('Update stats trigger error'), 'update-stats', {data: {report}});
 }

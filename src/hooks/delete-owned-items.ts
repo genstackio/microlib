@@ -1,5 +1,7 @@
 import caller from '../services/caller';
+import {mHookError} from "../m";
 
+// noinspection JSUnusedGlobalSymbols
 export default ({model, type, mode = 'pre', dir}) => async (queryOrResult, queryOrEmpty) => {
     const data = ('pre' === mode) ? queryOrResult.data : queryOrResult;
     const query = ('pre' === mode) ? queryOrResult : queryOrEmpty;
@@ -11,14 +13,23 @@ export default ({model, type, mode = 'pre', dir}) => async (queryOrResult, query
             {...query, fields: ['id'], [parentKey]: data.id},
             `${dir}/services/crud`
         )
-        await Promise.all(
+        await Promise.allSettled(
             ((page || {}).items || []).map(
-                async item =>
-                    caller.execute(`${type}_delete`, {...query, id: item.id}, `${dir}/services/crud`)
+                async item => {
+                    try {
+                        // keep the await
+                        return await caller.execute(`${type}_delete`, {
+                            ...query,
+                            id: item.id
+                        }, `${dir}/services/crud`);
+                    } catch (e2: any) {
+                        await mHookError(e2, 'delete-owned-items', {data: {type, item, data, parentKey, mode}});
+                    }
+                }
             )
         );
     } catch (e: any) {
-        console.error(e);
+        await mHookError(e, 'delete-owned-items', {data: {type, mode, data, parentKey}});
     }
     return queryOrResult;
 }

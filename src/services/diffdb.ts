@@ -1,4 +1,5 @@
 import dynamodb from './aws/dynamodb';
+import {mError} from "../m";
 
 const selectValue = ({s, i, f, b, n, o}) =>
     undefined !== s
@@ -120,6 +121,7 @@ const getDb = ({name}) => {
                 default: return changeResult({...change, o: 'S'}, 'E008');
             }
         } catch (e: any) {
+            await await mError(e, {tags: {mechanism: 'diffdb'}, data: {change}});
             !!process.env.DIFFDB_DEBUG && console.log('diffdb applyChange error E009', e, 'for change:', change);
             return changeResult({...change, o: 'S'}, 'E009', e.message);
         }

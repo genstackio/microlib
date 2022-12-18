@@ -1,3 +1,5 @@
+import {mBackendError} from "../m";
+
 const map = {
     ids: populateIdsCriterium,
     in: populateInCriterium,
@@ -165,6 +167,7 @@ export default (model: any, cfg: any) => {
         try {
             query = JSON.parse(order?.definition || '{}') || {};
         } catch (e: any) {
+            await mBackendError(e, 'searchapi', {data: {offset, limit, sort, order}});
             throw new Error(`Unable to parse order definition: ${e.message}`);
         }
         const index = order?.index || '';

@@ -1,5 +1,6 @@
 import sqs from './aws/sqs';
 import {loadPlugin} from '../utils';
+import {mError} from "../m";
 
 export default (allListeners = {}, {dir = undefined, typeKey = 'type'} = {}) => {
     const consumeMessage = async ({receiptHandle, attributes, rawMessage, eventType, queueUrl}) => {
@@ -21,7 +22,7 @@ export default (allListeners = {}, {dir = undefined, typeKey = 'type'} = {}) => 
         } catch (e: any) {
             result.status = 'failed';
             result.message = e.message;
-            console.error('message processing failed', e, {receiptHandle, attributes, rawMessage, eventType, queueUrl});
+            await mError(e, {tags: {mechanism: 'event'}, data: {receiptHandle, attributes, rawMessage, eventType, queueUrl}});
         }
         return result;
     };

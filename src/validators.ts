@@ -1,4 +1,5 @@
 import {buildAllowedTransitions} from "./utils";
+import {mValidatorError} from './m';
 
 export const boolean = () => ({test: v => 'boolean' === typeof v, message: v => `Not a boolean (actual: ${v})`});
 export const ipv4 = () => match({pattern: '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$', message: 'Not a valid IP v4 address'});
@@ -100,7 +101,7 @@ export const reference = ({type, localField, idField, targetIdField, fetchedFiel
                 localCtx.data[k] = requiredData;
                 return true;
             } catch (e: any) {
-                console.log(`Reference validator Error: type=${type}, localField=${localField} value=${value} => ${e.message}`);
+                await mValidatorError(e, 'reference', {data: {type, localField, value}});
                 return false;
             }
         },
