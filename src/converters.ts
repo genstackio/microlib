@@ -60,7 +60,7 @@ export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName
                 case 'contentAsBase64': x['contentAsBase64'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64'); break;
                 case 'contentAsBase64Url': x['contentAsBase64Url'] = Buffer.from(await s3.getFileContent(vv), 'utf-8').toString('base64url'); break;
                 case 'cdnUrl': x['cdnUrl'] = cdnObject ? await buildImageCdnUrl({...(cdnObject || {}), fingerprint: v['fingerprint']} as any, selection[k]) : undefined; break;
-                case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v) : (await s3.getFileViewUrl(vv)).viewUrl; break;
+                case 'url': x['url'] = urlPattern ? buildUrlFromPattern(urlPattern, vars, v, selection?.arguments?.url) : (await s3.getFileViewUrl(vv)).viewUrl; break;
                 case 'urlInfos': x['urlInfos'] = await s3.getFileViewUrl(vv); break;
                 case 'viewUrl': x['viewUrl'] = (await s3.getFileViewUrl(vv)).viewUrl; break;
                 case 'viewUrlInfos': x['viewUrlInfos'] = await s3.getFileViewUrl(vv); break;
@@ -467,9 +467,9 @@ export const screenshots = ({kind, key, format, attribute}) => async (v, result,
     return x;
 }
 
-function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any) {
+function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any, args: any = {}) {
     dynamicVars = {
-        extension: computeExtensionFromContentType((dynamicVars || {})['contentType']),
+        extension: args['format'] || computeExtensionFromContentType((dynamicVars || {})['contentType']),
         ...(dynamicVars || {}),
     };
     pattern = replaceVars(pattern, vars);
