@@ -469,7 +469,7 @@ export const screenshots = ({kind, key, format, attribute}) => async (v, result,
 
 function buildUrlFromPattern(pattern: string, vars: any, dynamicVars: any, args: any = {}) {
     dynamicVars = {
-        extension: args['format'] || computeExtensionFromContentType((dynamicVars || {})['contentType']),
+        extension: (args['format'] ? `.${args['format']}` : undefined) || computeExtensionFromContentType((dynamicVars || {})['contentType']),
         ...(dynamicVars || {}),
     };
     pattern = replaceVars(pattern, vars);
