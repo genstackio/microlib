@@ -50,7 +50,10 @@ async function buildValue({value = undefined, type = 'float', round = undefined,
     value = convertLegacyValue(value);
 
     const valueBuilder = async (item: any = {}) => {
-        let r: any = await evaluate(value, {joined: item || {}, new: result || {}, old: query?.oldData || {}, data: query?.data || {}, user: query?.user || {}, query, result});
+        let r: any = await evaluate(value, {joined: item || {}, neo: {...(query?.oldData || {}), ...Object.entries(result || {}).reduce((acc, [k, v]) => {
+                ((undefined !== v) && (null !== v)) && (acc[k] = v);
+                return acc;
+            }, {} as any)}, new: result || {}, old: query?.oldData || {}, data: query?.data || {}, user: query?.user || {}, query, result});
 
         switch (type) {
             case 'float': r = 'number' === typeof r ? r : parseFloat(r); break;
