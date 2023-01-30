@@ -53,7 +53,7 @@ export const secret = ({path}, {dir}) => async (v, query, fieldName) => {
 
     path = replaceVars(path, {fieldName})
 
-    return `ssm://secrets/${await storeSsmParam(path, v)}`;
+    return `ssm://secrets${await storeSsmParam(path, v)}`;
 }
 export const param = ({path}, {dir}) => async (v, query, fieldName) => {
     if ('%' === (path || '').slice(0, 1)) {
@@ -62,7 +62,7 @@ export const param = ({path}, {dir}) => async (v, query, fieldName) => {
     }
     path = replaceVars(path, {fieldName})
 
-    return `ssm://params/${await storeSsmParam(path, v)}`;
+    return `ssm://params${await storeSsmParam(path, v)}`;
 }
 
 async function storeSsmParam(path: string, value: any) {
