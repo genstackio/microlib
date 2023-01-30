@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols
 export default ({model: {volatileFields}}) => async data => {
     data.volatileData = !!data.volatileData ? data.volatileData : {};
     Object.entries(data.data).forEach(([k, v]) => {

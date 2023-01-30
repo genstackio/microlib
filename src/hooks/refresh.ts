@@ -1,8 +1,8 @@
 const buildValueGenerator = ({type, config = {}}, dir) => {
     let g;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         g = require('../refreshers');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         g = require(`${dir}/refreshers`);
     }
@@ -11,6 +11,7 @@ const buildValueGenerator = ({type, config = {}}, dir) => {
     return fn(config);
 };
 
+// noinspection JSUnusedGlobalSymbols
 export default ({model, dir}) => async data => {
     const refreshKey = 'watchTargets';
     await Promise.all(Object.entries(model[refreshKey] || {}).map(async ([k, def]) => {

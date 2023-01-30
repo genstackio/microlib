@@ -2,9 +2,9 @@ import ValidationError from '@ohoareau/errors/lib/ValidationError';
 
 const getValidator = (type, dir) => {
     let v;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         v = require('../validators');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         v = require(`${dir}/validators`);
     }

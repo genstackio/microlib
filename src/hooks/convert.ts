@@ -1,8 +1,8 @@
 const getConverter = (type, dir) => {
     let t;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         t = require('../converters');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         t = require(`${dir}/converters`);
     }

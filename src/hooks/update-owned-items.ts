@@ -1,3 +1,4 @@
+// noinspection JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 export default ({field, mode = 'pre'}) => async (queryOrResult, queryOrEmpty) => {
     const data = ('pre' === mode) ? queryOrResult.data : queryOrResult;
 

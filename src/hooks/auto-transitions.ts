@@ -7,6 +7,7 @@ const buildTransitionValue = def => {
     }
 };
 
+// noinspection JSUnusedGlobalSymbols
 export default ({model: {name, autoTransitionTo = {}}, dir}) => async data => {
     const fields = Object.keys(autoTransitionTo);
     if (!fields.length) return data;

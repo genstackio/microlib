@@ -1,8 +1,8 @@
 const getTransformer = (type, dir) => {
     let t;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         t = require('../transformers');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         t = require(`${dir}/transformers`);
     }
@@ -16,7 +16,7 @@ export default ({model: {transformers = {}}, dir}) => async data => {
             data.originalData[k] = v;
             data.data[k] = await transformers[k].reduce(async (acc, {type, config}) => {
                 acc = await acc;
-                return getTransformer(type, dir)(config)(acc, data);
+                return getTransformer(type, dir)(config)(acc, data, k);
             }, Promise.resolve(v));
         }
     }));

@@ -1,8 +1,8 @@
 const buildTrigger = ({type, config = {}}, dir): Function|undefined => {
     let g;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         g = require('../triggers');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         g = require(`${dir}/triggers`);
     }
@@ -10,7 +10,7 @@ const buildTrigger = ({type, config = {}}, dir): Function|undefined => {
 };
 
 async function itemTriggers(result, query, defs, dir) {
-    await Promise.all(Object.entries(defs).map(async ([k, dd]: [string, any]) => {
+    await Promise.all(Object.entries(defs).map(async ([, dd]: [string, any]) => {
         const t = buildTrigger(<any>dd, dir);
         if (t) {
             await t(result, query);
@@ -19,6 +19,7 @@ async function itemTriggers(result, query, defs, dir) {
     return result;
 }
 
+// noinspection JSUnusedGlobalSymbols
 export default ({model, dir}) => async (result, query, mode: string = 'item') => {
     const defs = model.triggers || {};
     switch (mode) {

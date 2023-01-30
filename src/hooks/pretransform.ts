@@ -1,14 +1,15 @@
 const getPretransformer = (type, dir) => {
     let t;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         t = require('../pretransformers');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         t = require(`${dir}/pretransformers`);
     }
     return t[type] || (() => x => x);
 };
 
+// noinspection JSUnusedGlobalSymbols
 export default ({model: {pretransformers = {}}, dir}) => async data => {
     data.originalData = data.originalData || {};
     await Promise.all(Object.entries(data.data).map(async ([k, v]) => {

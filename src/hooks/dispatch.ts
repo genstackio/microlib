@@ -1,5 +1,6 @@
 import sns from '../services/aws/sns';
 
+// noinspection JSUnusedGlobalSymbols
 export default ({o}) => async data => {
     await sns.publish({
         message: data,

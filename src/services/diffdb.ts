@@ -130,8 +130,8 @@ const getDb = ({name}) => {
     const applySpec = (o, pa, data) => {
         const i = pa.indexOf('.');
         if (-1 === i) return ('' === pa) ? Object.assign(o, data) : Object.assign(o, {[pa]: data});
-        const prefix = pa.substr(0, i);
-        const suffix = pa.substr(i + 1);
+        const prefix = pa.slice(0, i);
+        const suffix = pa.slice(i + 1);
         if (!o[prefix] || !Array.isArray(o[prefix])) o[prefix] = [];
         const ii = suffix.indexOf('.');
         let oo, id;
@@ -141,10 +141,10 @@ const getDb = ({name}) => {
             if (!oo) o[prefix].push(oo = {id});
             Object.assign(oo, data);
         } else {
-            id = suffix.substr(0, ii);
+            id = suffix.slice(0, ii);
             oo = o[prefix].find(x => x.id === id);
             if (!oo) o[prefix].push(oo = {id});
-            applySpec(oo, suffix.substr(ii + 1), data);
+            applySpec(oo, suffix.slice(ii + 1), data);
         }
         return o;
     };

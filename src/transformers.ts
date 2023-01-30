@@ -45,3 +45,35 @@ export const list = () => v => {
     }
     return x.length ? x.map(xx => `${xx}`) : undefined;
 }
+export const secret = ({path}, {dir}) => async (v, query, fieldName) => {
+    if ('%' === (path || '').slice(0, 1)) {
+        const fn = require(`${dir}/helpers`)[path.slice(1)];
+        path = await fn(query.data, fieldName);
+    }
+
+    path = replaceVars(path, {fieldName})
+
+    return `ssm://secrets/${await storeSsmParam(path, v)}`;
+}
+export const param = ({path}, {dir}) => async (v, query, fieldName) => {
+    if ('%' === (path || '').slice(0, 1)) {
+        const fn = require(`${dir}/helpers`)[path.slice(1)];
+        path = await fn(query.data, fieldName);
+    }
+    path = replaceVars(path, {fieldName})
+
+    return `ssm://params/${await storeSsmParam(path, v)}`;
+}
+
+async function storeSsmParam(path: string, value: any) {
+    const AWS = require('aws-sdk');
+    const ssm = new AWS.SSM();
+    await ssm.putParameter({
+        Name: path,
+        Value: value,
+        Overwrite: true,
+        Type: 'String',
+    }).promise();
+
+    return '/' === path.slice(0, 1) ? path : `/${path}`;
+}

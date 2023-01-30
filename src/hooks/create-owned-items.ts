@@ -1,5 +1,6 @@
 import caller from '../services/caller';
 
+// noinspection JSUnusedGlobalSymbols
 export default ({model, field, type, mode = 'pre', dir}) => async (queryOrResult, queryOrEmpty) => {
     const data = ('pre' === mode) ? queryOrResult.data : queryOrResult;
     const query = ('pre' === mode) ? queryOrResult : queryOrEmpty;

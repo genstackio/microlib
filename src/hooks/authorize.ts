@@ -2,9 +2,9 @@ import AuthorizeError from "@ohoareau/errors/lib/AuthorizeError";
 
 const buildAuthorizer = ({type, config = {}}, dir) => {
     let a;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         a = require('../authorizers');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         a = require(`${dir}/authorizers`);
     }
@@ -15,6 +15,7 @@ const checkAuthorizer = async (f, data, def, dir) => {
     if (!def || !def.type) throw new Error(`No authorizer type specified for '${f}'`);
     return buildAuthorizer(def, dir)((data.data || {})[f], data);
 }
+// noinspection JSUnusedGlobalSymbols
 export default ({model: {authorizers = {}}, dir}) => async data => {
     if (!authorizers) return data;
     const fields = Object.keys(authorizers);

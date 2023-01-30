@@ -5,9 +5,9 @@ const debugAuthorizerMiddleware = d('micro:middleware:authorizer');
 
 const createAuthorizer = ({type, dir, ...config }) => {
     let a;
-    if ('@' === type.substr(0, 1)) {
+    if ('@' === type.slice(0, 1)) {
         a = require('../middleware-authorizers');
-        type = type.substr(1);
+        type = type.slice(1);
     } else {
         a = require(`${dir}/middleware-authorizers`);
     }
@@ -19,6 +19,7 @@ function buildAuthorizerConfig({authorization = undefined, z}) {
     if ('string' === typeof config) config = {type: config};
     return {...config, dir: z};
 }
+// noinspection JSUnusedGlobalSymbols
 export default (cfg) => {
     const {o} = cfg;
     const builtConfig = buildAuthorizerConfig(cfg);
