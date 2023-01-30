@@ -16,7 +16,7 @@ export default ({model: {transformers = {}}, dir}) => async data => {
             data.originalData[k] = v;
             data.data[k] = await transformers[k].reduce(async (acc, {type, config}) => {
                 acc = await acc;
-                return getTransformer(type, dir)(config)(acc, data, k);
+                return getTransformer(type, dir)(config, {dir})(acc, data, k);
             }, Promise.resolve(v));
         }
     }));
