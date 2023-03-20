@@ -159,7 +159,28 @@ export default (model: any, cfg: any) => {
 
     async function search({index, offset, limit, sort, query: searchQuery}) {
         const {query, ...def} = buildSearchIndexInputFromSearchQuery(searchQuery) || {};
-        return sdk.searchIndexPage(index, query, 'string' === typeof offset ? parseInt(offset) : offset, limit, def, (!!sort && ('string' === typeof sort)) ? sort : undefined);
+        try {
+            // keep the `await` here to trigger the exception if any, and catch it here.
+            return await sdk.searchIndexPage(index, query, 'string' === typeof offset ? parseInt(offset) : offset, limit, def, (!!sort && ('string' === typeof sort)) ? sort : undefined);
+        } catch (e: any) {
+            try {
+                if (e && e.getStatus && ('function' === typeof e.getStatus)) {
+                    const status = e.getStatus();
+                    switch (status) {
+                        case 404:
+                            await mBackendError(e, 'searchapi', {data: {status, index, offset, limit, sort, query}});
+                            return {cursor: undefined, items: [], count: 0};
+                        default:
+                            // noinspection ExceptionCaughtLocallyJS
+                            throw e;
+                    }
+                }
+            } catch (e2: any) {
+                // there was an unexpected error when trying to get the status of the previous error, so ignore
+                throw e;
+            }
+            throw e;
+        }
     }
 
     async function searchFromOrder({offset, limit, sort, order}) {
