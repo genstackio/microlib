@@ -2,7 +2,7 @@ import {buildAllowedTransitions} from "./utils";
 import {mValidatorError} from './m';
 
 export const boolean = () => ({test: v => 'boolean' === typeof v, message: v => `Not a boolean (actual: ${v})`});
-export const ipv4 = () => match({pattern: '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$', message: 'Not a valid IP v4 address'});
+export const ipv4 = () => match({pattern: '^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$', message: 'Not a valid IP v4 address'});
 export const even = () => ({test: v => 0 === (v % 2), message: v => `Even number expected (${v})`});
 export const odd = () => ({test: v => 1 === (v % 2), message: v => `Odd number expected (${v})`});
 export const min = ({value: x}) => ({test: v => v >= x, message: v => `Min not satisfied (${v} < ${x})`});
@@ -40,7 +40,8 @@ export const hasUpperLetter = () => match({pattern: '[A-Z]+', message: 'At least
 export const hasLowerLetter = () => match({pattern: '[a-z]+', message: 'At least one lower case letter is required'});
 export const hasDigit = () => match({pattern: '[0-9]+', message: 'At least one digit is required'});
 export const hasSpecialChar = () => match({pattern: '[!:$@&%()\\[\\];,/]+', message: 'At least one special character is required'});
-export const email = () => match({pattern: '[^@]+@.+\.[^.]+$', message: 'Not a valid email'});
+export const email = () => match({pattern: '^[^@\\s]+@[^@\\s]+\\.[^@\\s.]+$', message: 'Not a valid email'});
+export const phone = () => match({pattern: '^[0-9\\-\\+]+$', message: 'Not a valid phone'});
 export const uuid = () => match({pattern: '^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$', flags: 'i', message: `Not a valid uuid (actual: {{v}}, expected: v4 format)`});
 export const url = () => match({pattern: '^http[s]?://.+$', flags: 'i', message: `Not a valid URL`});
 export const arn = () => match({pattern: '^arn:[^:]*:[^:]*:[^:]*:[^:]*:.+$', message: `Not a valid AWS ARN`});

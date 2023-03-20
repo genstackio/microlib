@@ -20,6 +20,12 @@ beforeEach(() => {
 })
 describe('validators', () => {
     [
+        ['email', 'ol@ivier.co', {}, true, ''],
+        ['email', 'ol@ivier', {}, false, 'Not a valid email'],
+        ['ipv4', '192.168.0.1', {}, true, ''],
+        ['ipv4', '192x168.0.1', {}, false, 'Not a valid IP v4 address'],
+        ['phone', '1-811-902-543', {}, true],
+        ['phone', '1-811-902-543 Whatsapp', {}, false, 'Not a valid phone'],
         ['year', 2020, {}, true, ''],
         ['year', 1754, {}, false, 'Year must be >= 1800 and <= 2100 (actual: 1754)'],
         ['min', 10, {value: 10}, true, ''],
