@@ -15,6 +15,26 @@ export const s3file_url_dl = () => async v => v ? (await require('@ohoareau/aws'
 export const s3file_url_dl_infos = () => async v => v ? require('@ohoareau/aws').s3.getFileDownloadUrl(v) : undefined;
 export const s3file_url_ul = () => async v => v ? (await require('@ohoareau/aws').s3.getFileUploadUrl(v)).uploadUrl : undefined;
 export const s3file_url_ul_infos = () => async v => v ? require('@ohoareau/aws').s3.getFileUploadUrl(v) : undefined;
+export const chart = ({attribute, urlPattern, prefix, idPrefix, tokenPrefix}) => async (v, result, query) => {
+    const x = {available: true};
+    const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
+
+    const [selection, selected] = buildGqlSelectionInfos(query, attribute);
+
+    await Promise.all(selected.map(async k => {
+        switch (k) {
+            case 'json': x['json'] =  await buildChartJsonFromParams(vars, {prefix, idPrefix, tokenPrefix}); break;
+            case 'url': x['url'] = buildUrlFromPattern(urlPattern, vars, v, selection?.arguments?.url); break;
+            default: break;
+        }
+    }));
+
+    return x;
+}
+
+async function buildChartJsonFromParams(vars: any, {prefix, idPrefix, tokenPrefix}: {prefix?: string, idPrefix?: string, tokenPrefix?: string}) {
+    return {}; // @todo
+}
 export const image = ({bucket: archiveBucket, key: archiveKey, name: archiveName, attribute, urlPattern}) => async (v, result, query) => {
     const x = {available: false};
     if (v && v.fingerprint) x.available = true;
