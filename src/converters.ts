@@ -19,12 +19,15 @@ export const chart = ({attribute, urlPattern, prefix, idPrefix, tokenPrefix}) =>
     const x = {};
     const vars = {
         ...query, ...(query.oldData || {}), ...(query.data || {}), ...result,
-        fingerprint: 'a01de45cad870bca43',
     };
 
     const [selection, selected] = buildGqlSelectionInfos(query, attribute);
 
-    v = {contentType: 'image/png', ...v};
+    v = {
+        fingerprint: 'a01de45cad870bca43',
+        contentType: 'image/png',
+        ...v,
+    };
 
     await Promise.all(selected.map(async k => {
         switch (k) {
