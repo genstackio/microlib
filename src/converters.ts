@@ -16,14 +16,20 @@ export const s3file_url_dl_infos = () => async v => v ? require('@ohoareau/aws')
 export const s3file_url_ul = () => async v => v ? (await require('@ohoareau/aws').s3.getFileUploadUrl(v)).uploadUrl : undefined;
 export const s3file_url_ul_infos = () => async v => v ? require('@ohoareau/aws').s3.getFileUploadUrl(v) : undefined;
 export const chart = ({attribute, urlPattern, prefix, idPrefix, tokenPrefix}) => async (v, result, query) => {
-    const x = {available: true};
-    const vars = {...query, ...(query.oldData || {}), ...(query.data || {}), ...result};
+    const x = {};
+    const vars = {
+        ...query, ...(query.oldData || {}), ...(query.data || {}), ...result,
+        fingerprint: 'a01de45cad870bca43',
+    };
 
     const [selection, selected] = buildGqlSelectionInfos(query, attribute);
+
+    v = {contentType: 'image/png', ...v};
 
     await Promise.all(selected.map(async k => {
         switch (k) {
             case 'json': x['json'] =  await buildChartJsonFromParams(vars, {prefix, idPrefix, tokenPrefix}); break;
+            case 'contentType': x['contentType'] =  v['contentType']; break;
             case 'url': x['url'] = buildUrlFromPattern(urlPattern, vars, v, selection?.arguments?.url); break;
             default: break;
         }
