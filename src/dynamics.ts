@@ -102,6 +102,9 @@ export const pattern_url = (config: any) => {
         } else if ('wsr://' == pattern.slice(0, 6)) {
             const [webservice, ...others] = pattern.slice(6).split(/\//g);
             pattern = `${(process.env['WSR_PROTOCOL_URL'] || '').replace(/\{\{webservice\}\}/g, webservice)}${others.length ? '/' : ''}${others.join('/')}`;
+        } else if ('r://' == pattern.slice(0, 4)) {
+            const [...others] = pattern.slice(4).split(/\//g);
+            pattern = `${process.env['R_PROTOCOL_URL'] || ''}${others.length ? '/' : ''}${others.join('/')}`;
         }
     }
     return completeDoc => {
@@ -117,6 +120,11 @@ export const msr_url = (config: any) => {
 export const ms_url = (config: any) => {
     const [microservice, uri = '']: [string, string?] = (config['ms_url'] || '').split(':');
     const pattern = `${(process.env['MS_PROTOCOL_URL'] || '').replace(/\{\{microservice\}\}/g, microservice)}${uri}`;
+    return completeDoc => replaceVars(pattern, completeDoc) || undefined;
+}
+export const r_url = (config: any) => {
+    const uri = config['r_url'] || '';
+    const pattern = `${process.env['R_PROTOCOL_URL'] || ''}${uri}`;
     return completeDoc => replaceVars(pattern, completeDoc) || undefined;
 }
 export const ws_url = (config: any) => {
