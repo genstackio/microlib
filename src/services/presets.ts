@@ -22,8 +22,8 @@ async function applyPresets(phase, query, type, data, codes = [], fetchPreset, e
 
 async function applyPreset(phase, query, type, data, preset, enhsBuilt, call, metas, joins) {
     return (enhsBuilt || []).reduce(async (acc, enh) => {
-        acc = await acc;
-        return (await enh.enhance(acc, (preset || {}).parsedDefinition || {}, call, metas, joins)) || acc;
+        acc = (await acc) || {};
+        return {...acc, ...((await enh.enhance(acc, (preset || {}).parsedDefinition || {}, call, metas, joins)) || {})};
     }
     , Promise.resolve(data));
 }
