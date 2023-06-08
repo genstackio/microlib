@@ -6,6 +6,8 @@ import isEqualTo from "./isEqualTo";
 import isDefined from "./isDefined";
 import isLessThan from "./isLessThan";
 import isTransition from "./isTransition";
+import hasValueChanged from "./hasValueChanged";
+import isValueCleared from "./isValueCleared";
 import isNotEqualTo from "./isNotEqualTo";
 import isNotDefined from "./isNotDefined";
 import isGreaterThan from "./isGreaterThan";
@@ -79,6 +81,7 @@ export function createHelpers(model, dir) {
             requires, dynamics, authorize, validate, prepopulate, populate, prefetch, dispatch, pretransform,
             convert, transform, mutate, prepare, after, autoTransitions, isTransition, isEqualTo, isNotEqualTo,
             isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo,
+            isValueCleared, hasValueChanged,
             event, hook, call, lambdaEvent, snsPublish, updateReferences, deleteReferences, updateStats, rule,
             postEnhance, preEnhance, refresh,
         };
