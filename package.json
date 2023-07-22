@@ -1,6 +1,6 @@
 {
     "name": "@ohoareau/microlib",
-    "version": "0.23.25",
+    "version": "0.23.26",
     "license": "MIT",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -22,7 +22,7 @@
         "test": "jest --config jest.config.js"
     },
     "dependencies": {
-        "@ohoareau/aws": "^0.3.5",
+        "@ohoareau/aws": "^0.3.6",
         "@ohoareau/build-package": "^0.2.1",
         "@ohoareau/errors": "^0.2.0",
         "@genstackio/auth-jwt": "^0.1.3",

@@ -745,10 +745,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@ohoareau/aws@^0.3.5":
-  version "0.3.5"
-  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.3.5.tgz#ed166b57ec248392d15440c44d89b2ff96116a70"
-  integrity sha512-CFSTcqdZw6icGkSQxErP+xh3DYGHyC5NRPXIAn5bNdZtJf/j79aGV4GO4ZMsFg4DlXd9hwfBkDCmmM5Pdkfm5w==
+"@ohoareau/aws@^0.3.6":
+  version "0.3.6"
+  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.3.6.tgz#3afcb942ea2feb8cfdaea26831f79065cb527905"
+  integrity sha512-y9B3Yg4iIN/Nyv1CfrFwkGCyU+94IArsvgbNPh94koXi0rN5PQIujPrVmOrD76KsFxgjX5E1r4/xS7q9YmV+xQ==
   dependencies:
     "@ohoareau/errors" "^0.2.0"
     uuid "^8.3.1"
