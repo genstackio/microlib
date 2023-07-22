@@ -22,10 +22,10 @@
         "test": "jest --config jest.config.js"
     },
     "dependencies": {
-        "@ohoareau/aws": "^0.2.0",
+        "@ohoareau/aws": "^0.3.5",
         "@ohoareau/build-package": "^0.2.1",
         "@ohoareau/errors": "^0.2.0",
-        "@genstackio/auth-jwt": "^0.1.0",
+        "@genstackio/auth-jwt": "^0.1.3",
         "debug": "^4.3.4"
     },
     "peerDependencies": {

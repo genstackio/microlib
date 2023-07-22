@@ -489,10 +489,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@genstackio/auth-jwt@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@genstackio/auth-jwt/-/auth-jwt-0.1.0.tgz#6602a6e1df17b38c8455af6d59192ddbd91cd63e"
-  integrity sha512-UIzmURdPkonwsbjX9x59R1NAwaes55kGv6WjFnrUb3cLKuXENVb26NHQW6gTGr4LM5OQ4uffC+6V8itnZpEzKQ==
+"@genstackio/auth-jwt@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@genstackio/auth-jwt/-/auth-jwt-0.1.3.tgz#9ae25c77f71c8863224eceddeda1f74b0963128f"
+  integrity sha512-eR4cmx80zb1gM8MkTpBkd35veLvaY1UrznhyAgIXfRLpbOg/t3deZ6xjqXJKPEzmfEJrUbo2syKKHGti+Y/wBw==
   dependencies:
     "@ohoareau/errors" "^0.2.0"
 
@@ -745,10 +745,10 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@ohoareau/aws@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.2.0.tgz#0ea013cbfe12110fb125d066b358e9e58de95538"
-  integrity sha512-aAoV4Ksy8+QKaKW9/quJW585Rlz2XSlAqNojBKTfLbk8CuXGvcefihN3bWkQU6j7VsUAmJsue3OHVNpM0hbQKw==
+"@ohoareau/aws@^0.3.5":
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.3.5.tgz#ed166b57ec248392d15440c44d89b2ff96116a70"
+  integrity sha512-CFSTcqdZw6icGkSQxErP+xh3DYGHyC5NRPXIAn5bNdZtJf/j79aGV4GO4ZMsFg4DlXd9hwfBkDCmmM5Pdkfm5w==
   dependencies:
     "@ohoareau/errors" "^0.2.0"
     uuid "^8.3.1"
