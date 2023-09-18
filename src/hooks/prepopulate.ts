@@ -32,7 +32,7 @@ export default ({model, dir, prefix = undefined}) => async data => {
     let v;
     data.autoPopulated = data.autoPopulated || {};
     await Promise.all(Object.entries(model[defaultValuesKey] || {}).map(async ([k, def]) => {
-        if (data.data[k]) return;
+        if (data.data[k] !== undefined && data.data[k] !== null) return;
         v = await buildValueGenerator(<any>def, dir)(data);
         if ('**unchanged**' !== v) {
             if ('**clear**' === v) {
