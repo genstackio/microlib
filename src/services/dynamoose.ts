@@ -76,19 +76,19 @@ const buildQueryModifiers = s => {
     );
 };
 
-const buildQueryDefinitionFromCriteria = (index, hashKey, rangeKey, criteria) => {
+const buildQueryDefinitionFromCriteria = (index, hashKey, rangeKey, criteria, scan = false) => {
     const localCriteria = {...criteria};
     hashKey = hashKey ? (Array.isArray(hashKey) ? hashKey : [index, hashKey]) : undefined;
     let modifiers = <any[]>[];
     let query:any = {};
     if (index) {
-            modifiers.push({type: 'index', name: index});
+        modifiers.push({type: 'index', name: index});
         if (hashKey) {
-            if (index === hashKey[0]) {
-                query[hashKey[0]] = {eq: hashKey[1]};
-            } else {
+            if (scan) {
                 modifiers.push({type: 'where', name: hashKey[0]});
                 modifiers.push({type: 'eq', value: hashKey[1]});
+            } else {
+                query[hashKey[0]] = {eq: hashKey[1]};
             }
         }
         if (rangeKey) {
@@ -97,14 +97,22 @@ const buildQueryDefinitionFromCriteria = (index, hashKey, rangeKey, criteria) =>
         }
     } else {
         if (hashKey) {
-            query[hashKey[0]] = {eq: hashKey[1]};
+            if (!scan) {
+                query[hashKey[0]] = {eq: hashKey[1]};
+            }
         }
         if (rangeKey) {
             modifiers.push({type: 'where', name: rangeKey[0]});
             modifiers.push({type: rangeKey[1], ...(('undefined' === typeof rangeKey[2]) ? {} : (('object' === typeof rangeKey[2]) ? rangeKey[2] : {value: rangeKey[2]}))});
         }
     }
-    if (localCriteria._) modifiers = buildQueryModifiers(localCriteria._);
+    if (localCriteria._) {
+        const newModifiers = buildQueryModifiers(localCriteria._);
+        if (modifiers?.length) throw new Error(
+            `Overwritting modifiers [${JSON.stringify(modifiers)}] with [${JSON.stringify(newModifiers)}] for dynamoose query on index '${index}' (hashKey: ${hashKey}, rangeKey: ${rangeKey}, scan: ${scan ? 'true' : 'false'}, criteria: [${JSON.stringify(criteria)}])`
+        );
+        modifiers = newModifiers;
+    }
     delete localCriteria._; // always delete even if empty
     const keys = Object.keys(localCriteria);
     if (keys.length) {
@@ -186,23 +194,27 @@ export const applyQuerySort = (q: {ascending: Function, descending: Function}, d
     }
 };
 
-const runQuery = async (m, {index = undefined, hashKey = undefined, rangeKey = undefined, criteria, fields, limit, offset, sort, options = {}}) => {
-    const {query, modifiers} = buildQueryDefinitionFromCriteria(index, hashKey, rangeKey, criteria);
-    let q = query ? m.query(query) : m.scan();
-    if (!q || !q.exec) throw new Error('Unable to build query/scan from definition');
-    q = applyModifiers(q, modifiers);
-    if (limit) q.limit(limit);
-    if (fields && fields.length) q.attributes(fields);
-    if (offset) q.startAt(offset);
-    if (sort) applyQuerySort(q, sort);
-    if (options) {
-        if (options['consistent']) q.consistent();
-        if (options['all'] && q.all) q.all(
-            'undefined' !== typeof options['delay'] ? options['delay'] : 100,
-            'undefined' !== typeof options['max'] ? options['max'] : 0,
-        );
+const runQuery = async (m, {index = undefined, hashKey = undefined, rangeKey = undefined, criteria, fields, limit, offset, sort, scan = false, options = {}}) => {
+    try {
+        const {query, modifiers} = buildQueryDefinitionFromCriteria(index, hashKey, rangeKey, criteria, scan);
+        let q = (!scan && query) ? m.query(query) : m.scan();
+        if (!q || !q.exec) throw new Error('Unable to build query/scan from definition');
+        q = applyModifiers(q, modifiers);
+        if (limit) q.limit(limit);
+        if (fields && fields.length) q.attributes(fields);
+        if (offset) q.startAt(offset);
+        if (sort) applyQuerySort(q, sort);
+        if (options) {
+            if (options['consistent']) q.consistent();
+            if (options['all'] && q.all) q.all(
+                'undefined' !== typeof options['delay'] ? options['delay'] : 100,
+                'undefined' !== typeof options['max'] ? options['max'] : 0,
+            );
+        }
+        return await q.exec(); // keep the await to trigger inside the try/catch
+    } catch (e: any) {
+        throw new Error(`Query error for ${m.name}: ${e.message}`);
     }
-    return q.exec();
 };
 
 const convertToQueryDsl = v => {
@@ -333,9 +345,10 @@ export default {
                         limit: 1,
                         offset: undefined,
                         sort: undefined,
+                        scan: false,
                     }) || []).map(d => ({...(d || {})}));
                 } else if (('object' === typeof payload) && 0 < Object.keys(payload).length) {
-                    const {index = undefined, fields = [], ...criteria} = payload;
+                    const {index = undefined, fields = [], scan = false, ...criteria} = payload;
                     idValue = criteria;
                     [doc = undefined] = (await runQuery(model, {
                         index,
@@ -344,6 +357,7 @@ export default {
                         limit: 1,
                         offset: undefined,
                         sort: undefined,
+                        scan,
                     }) || []).map(d => ({...(d || {})}));
                 }
                 let r: any = undefined;
@@ -373,6 +387,7 @@ export default {
                         limit: undefined,
                         offset: undefined,
                         sort: undefined,
+                        scan: false,
                     }) || []);
                     await model.batchDelete(toDeleteIds.map(doc => ({id: doc.id})), payload.options);
                     docs = toDeleteIds;
@@ -410,6 +425,7 @@ export default {
                         limit: undefined,
                         offset: undefined,
                         sort: undefined,
+                        scan: false,
                     }) || []);
                     docs = await Promise.all(ids.map(async doc => await model.update({id: (<any>doc).id}, buildUpdateObject(payload.data), payload.options) as unknown as Promise<any> || {}));
                 }
