@@ -154,7 +154,7 @@ function convertPageItemPropertyFromModel(item: any, k: string, v: any, model: a
     switch (model?.fields?.[k]?.type) {
         case 'object':
             try {
-                item[k] = 'string' === typeof v ? (!v.trim() ? undefined : JSON.parse(v)) : v;
+                item[k] = ('string' === typeof v) ? (!v.trim() ? undefined : JSON.parse(v)) : v;
             } catch (e: any) {
                 // unable to parse value as json, keep it as is
             }
@@ -164,8 +164,8 @@ function convertPageItemPropertyFromModel(item: any, k: string, v: any, model: a
     }
 }
 function convertPageItemFromModel(item: any, model: any) {
-    Object.entries(item).reduce((acc, [k, v]) => {
-        convertPageItemPropertyFromModel(item, k, v, model);
+    return Object.entries(item).reduce((acc, [k, v]) => {
+        convertPageItemPropertyFromModel(acc, k, v, model);
         return acc;
     }, {...item});
 }
@@ -173,7 +173,7 @@ function convertPageFromModel(page: any, model: any) {
     if (!page?.items?.length) return page;
     return {
         ...page,
-        items: page.items.map(item => convertPageItemFromModel(item, model)),
+        items: page.items.map((item: any) => convertPageItemFromModel(item, model)),
     };
 }
 // noinspection JSUnusedGlobalSymbols
