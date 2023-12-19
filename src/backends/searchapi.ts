@@ -150,6 +150,32 @@ function mutateCriteria(rawCriteria: any): any {
     return rawCriteria.map((c) => populateSearchIndexInputFromSearchQueryCriterium(c));
 }
 
+function convertPageItemPropertyFromModel(item: any, k: string, v: any, model: any) {
+    switch (model?.fields?.[k]?.type) {
+        case 'object':
+            try {
+                item[k] = 'string' === typeof v ? (!v.trim() ? undefined : JSON.parse(v)) : v;
+            } catch (e: any) {
+                // unable to parse value as json, keep it as is
+            }
+            break;
+        default:
+            break;
+    }
+}
+function convertPageItemFromModel(item: any, model: any) {
+    Object.entries(item).reduce((acc, [k, v]) => {
+        convertPageItemPropertyFromModel(item, k, v, model);
+        return acc;
+    }, {...item});
+}
+function convertPageFromModel(page: any, model: any) {
+    if (!page?.items?.length) return page;
+    return {
+        ...page,
+        items: page.items.map(item => convertPageItemFromModel(item, model)),
+    };
+}
 // noinspection JSUnusedGlobalSymbols
 export default (model: any, cfg: any) => {
     if (!cfg || !cfg.package) throw new Error(`Unspecified searchapi package in configuration of backend searchapi`);
@@ -161,7 +187,7 @@ export default (model: any, cfg: any) => {
         const {query, ...def} = buildSearchIndexInputFromSearchQuery(searchQuery) || {};
         try {
             // keep the `await` here to trigger the exception if any, and catch it here.
-            return await sdk.searchIndexPage(index, query, 'string' === typeof offset ? parseInt(offset) : offset, limit, def, (!!sort && ('string' === typeof sort)) ? sort : undefined);
+            return convertPageFromModel(await sdk.searchIndexPage(index, query, 'string' === typeof offset ? parseInt(offset) : offset, limit, def, (!!sort && ('string' === typeof sort)) ? sort : undefined), model);
         } catch (e: any) {
             try {
                 if (e && e.getStatus && ('function' === typeof e.getStatus)) {
