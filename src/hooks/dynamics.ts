@@ -1,4 +1,4 @@
-const buildValueGenerator = ({type, config = {}, field, isFieldSelected, fieldSelections = {}}: {type?: string, config?: any, field: string, isFieldSelected: boolean, fieldSelections?: any}, dir): Function|undefined => {
+const buildValueGenerator = ({type, config = {}, field, isFieldSelected, fieldSelections = {}, fieldArguments = {}}: {type?: string, config?: any, field: string, isFieldSelected: boolean, fieldSelections?: any, fieldArguments?: any}, dir): Function|undefined => {
     let g;
     type = type || 'unknown';
     if ('@' === type.slice(0, 1)) {
@@ -9,13 +9,13 @@ const buildValueGenerator = ({type, config = {}, field, isFieldSelected, fieldSe
     }
     const fn = g[type.replace(/-/g, '_')] || g.empty;
     if (!fn) throw new Error(`Unknown generator '${type}'`);
-    return fn({...config, field, isFieldSelected, fieldSelections, dir});
+    return fn({...config, field, isFieldSelected, fieldSelections, fieldArguments, dir});
 };
 
 async function populateItem(result, query, defs, selectedFields, realSelectedFields, fieldsSelections, dir) {
-    await Promise.all(selectedFields.map(async k => {
+    await Promise.all(selectedFields.map(async (k: string) => {
         if (!defs[k]) return;
-        const g = buildValueGenerator({...<any>defs[k], field: k, isFieldSelected: (realSelectedFields || []).includes(k), fieldSelections: (fieldsSelections || {})[k]}, dir);
+        const g = buildValueGenerator({...<any>defs[k], field: k, isFieldSelected: (realSelectedFields || []).includes(k), fieldSelections: (fieldsSelections || {})[k], fieldArguments: query.arguments?.[k] || {}}, dir);
         if (g) {
             result[k] = await g(result, query);
             query.resultAutoPopulated = query.resultAutoPopulated || {};
