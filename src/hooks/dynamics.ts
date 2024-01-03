@@ -14,10 +14,8 @@ const buildValueGenerator = ({type, config = {}, field, isFieldSelected, fieldSe
 
 async function populateItem(result, query, defs, selectedFields, realSelectedFields, fieldsSelections, dir) {
     await Promise.all(selectedFields.map(async (k: string) => {
-        const xxx = (fieldsSelections || {})[k];
-        const dd = defs[k] || ((xxx && xxx?.aliasing) ? defs[xxx.aliasing || ''] : undefined);
-        if (!dd) return;
-        const g = buildValueGenerator({...<any>dd, field: k, isFieldSelected: (realSelectedFields || []).includes(k), fieldSelections: (fieldsSelections || {})[k], fieldArguments: query.arguments?.[k] || {}}, dir);
+        if (!defs[k]) return;
+        const g = buildValueGenerator({...<any>defs[k], field: k, isFieldSelected: (realSelectedFields || []).includes(k), fieldSelections: (fieldsSelections || {})[k], fieldArguments: query.arguments?.[k] || {}}, dir);
         if (g) {
             result[k] = await g(result, query);
             query.resultAutoPopulated = query.resultAutoPopulated || {};
