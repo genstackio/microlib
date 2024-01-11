@@ -87,9 +87,9 @@ export function hourQuarterEndDate(now) {
     return undefined;
 }
 export function buildDate({year, month, week, day, hour}) {
-    if (week) return buildWeekDate({year, week});
     if (hour) return buildHourDate({year, month, day, hour});
     if (day) return buildDayDate({year, month, day});
+    if (week) return buildWeekDate({year, week});
     if (month) return buildMonthDate({year, month});
     if (year) return buildYearDate({year});
 
