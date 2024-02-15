@@ -5,7 +5,7 @@ export function hasValueChanged(attribute, data) {
 
     if ((current === undefined) || (current === null)) return false;
 
-    if ((current === '*cleared*') || (current === '')) current = undefined;
+    if ((current === '**clear**') || (current === '')) current = undefined;
 
     return current !== old;
 }
