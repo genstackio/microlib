@@ -43,6 +43,15 @@ function convertRows(rows: any[], opts: { renameColumnNames : boolean }) {
         }, {} as any);
     });
 }
+
+type query = {
+    query?: string;
+    queryParams?: Record<string, any>;
+    limit?: number;
+    renameColumnNames?: boolean;
+    throwErrorIfNone?: boolean;
+};
+
 // noinspection JSUnusedGlobalSymbols
 export default ({name}: any, _: any) => {
 
@@ -50,10 +59,20 @@ export default ({name}: any, _: any) => {
     const table = process.env[`KEYSPACES_${name.toUpperCase()}_TABLE_NAME`] || (process.env.KEYSPACES_TABLE_NAME_PATTERN || '').replace('{{name}}', name) || undefined;
     const client = createClient(keyspace);
 
-    async function execute({query, renameColumnNames = false}: { query: string | undefined, renameColumnNames?: boolean }) {
+    function prepareQuery(query, _: Record<string, any> | undefined, limit: number | undefined) {
+        let q = (query || '').replace(/\{\{table_name}}/ig, table || '');
+        ((undefined !== limit) && (null !== limit)) && (q = `${q} LIMIT ${Number(limit) || 1}`);
+        return q;
+    }
+    async function execute({query, queryParams = undefined, limit = undefined, renameColumnNames = false, throwErrorIfNone = false}: query) {
         try {
-            const finalQuery = (query || '').replace(/\{\{table_name}}/ig, table || '');
-            const rr = await client.execute(finalQuery); // keep the await
+            const finalQuery = prepareQuery(query, queryParams, limit);
+            const rr = await client.execute(finalQuery, queryParams); // keep the await
+            if (!rr?.rows?.[0]) {
+                if (throwErrorIfNone) { // noinspection ExceptionCaughtLocallyJS
+                    throw new DocumentNotFoundError(name, '?');
+                }
+            }
             return {items: convertRows(rr.rows || [], {renameColumnNames}), count: rr.rows?.length || 0, cursor: undefined};
         } catch (e: any) {
             try {
@@ -61,7 +80,7 @@ export default ({name}: any, _: any) => {
                     const status = e.getStatus();
                     switch (status) {
                         case 404:
-                            await mBackendError(e, 'keyspaces', {data: {status, query}});
+                            await mBackendError(e, 'keyspaces', {data: {status, query, queryParams: queryParams}});
                             return {cursor: undefined, items: [], count: 0};
                         default:
                             // noinspection ExceptionCaughtLocallyJS
@@ -76,13 +95,35 @@ export default ({name}: any, _: any) => {
         }
     }
 
-    async function executeOne({ throwErrorIfNone = true, ...q }: { query: string | undefined, renameColumnNames?: boolean, throwErrorIfNone?: boolean }) {
-        const r = await execute(q);
-        if (!r?.items?.[0]) {
-            if (throwErrorIfNone) throw new DocumentNotFoundError(name, '?');
-            return undefined;
+    async function executeOne({ throwErrorIfNone = true, ...q }: query) {
+        try {
+            const r = await execute(q);
+            if (!r?.items?.[0]) {
+                if (throwErrorIfNone) { // noinspection ExceptionCaughtLocallyJS
+                    throw new DocumentNotFoundError(name, '?');
+                }
+                return undefined;
+            }
+            return r.items[0];
+        } catch (e: any) {
+            try {
+                if (e && e.getStatus && ('function' === typeof e.getStatus)) {
+                    const status = e.getStatus();
+                    switch (status) {
+                        case 404:
+                            await mBackendError(e, 'keyspaces', {data: {status, query: q.query, queryParams: q.queryParams}});
+                            return undefined;
+                        default:
+                            // noinspection ExceptionCaughtLocallyJS
+                            throw e;
+                    }
+                }
+            } catch (e2: any) {
+                // there was an unexpected error when trying to get the status of the previous error, so ignore
+                throw e;
+            }
+            throw e;
         }
-        return r.items[0];
     }
     return {
         execute,
