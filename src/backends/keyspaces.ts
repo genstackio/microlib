@@ -2,6 +2,7 @@ import {mBackendError} from "../m";
 import cassandra from 'cassandra-driver';
 import fs from 'fs';
 import sigV4 from 'aws-sigv4-auth-cassandra-plugin';
+import DocumentNotFoundError from "@ohoareau/errors/lib/DocumentNotFoundError";
 
 function createClient(keyspace: string|undefined) {
     const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION;
@@ -75,7 +76,16 @@ export default ({name}: any, _: any) => {
         }
     }
 
+    async function executeOne({ throwErrorIfNone = true, ...q }: { query: string | undefined, renameColumnNames?: boolean, throwErrorIfNone?: boolean }) {
+        const r = await execute(q);
+        if (!r?.items?.[0]) {
+            if (throwErrorIfNone) throw new DocumentNotFoundError(name, '?');
+            return undefined;
+        }
+        return r.items[0];
+    }
     return {
         execute,
+        executeOne,
     };
 }
