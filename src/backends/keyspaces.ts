@@ -50,6 +50,7 @@ type query = {
     limit?: number;
     renameColumnNames?: boolean;
     throwErrorIfNone?: boolean;
+    offset?: string;
 };
 
 // noinspection JSUnusedGlobalSymbols
@@ -64,16 +65,16 @@ export default ({name}: any, _: any) => {
         ((undefined !== limit) && (null !== limit)) && (q = `${q} LIMIT ${Number(limit) || 1}`);
         return q;
     }
-    async function execute({query, queryParams = undefined, limit = undefined, renameColumnNames = false, throwErrorIfNone = false}: query) {
+    async function execute({query, queryParams = undefined, offset = undefined, limit = undefined, renameColumnNames = false, throwErrorIfNone = false}: query) {
         try {
             const finalQuery = prepareQuery(query, queryParams, limit);
-            const rr = await client.execute(finalQuery, queryParams); // keep the await
+            const rr = await client.execute(finalQuery, queryParams, { ...(offset ? { pageState: offset } : {})}); // keep the await
             if (!rr?.rows?.[0]) {
                 if (throwErrorIfNone) { // noinspection ExceptionCaughtLocallyJS
                     throw new DocumentNotFoundError(name, '?');
                 }
             }
-            return {items: convertRows(rr.rows || [], {renameColumnNames}), count: rr.rows?.length || 0, cursor: undefined};
+            return {items: convertRows(rr.rows || [], {renameColumnNames}), count: rr.rows?.length || 0, cursor: rr.pageState};
         } catch (e: any) {
             try {
                 if (e && e.getStatus && ('function' === typeof e.getStatus)) {
