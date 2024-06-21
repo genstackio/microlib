@@ -17,7 +17,7 @@ export default ({model: {pretransformers = {}}, dir}) => async data => {
             data.originalData[k] = v;
             data.data[k] = await pretransformers[k].reduce(async (acc, {type, config}) => {
                 acc = await acc;
-                return getPretransformer(type, dir)(config)(acc);
+                return getPretransformer(type, dir)(config)(acc, data);
             }, Promise.resolve(v));
         }
     }));
