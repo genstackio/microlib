@@ -194,6 +194,13 @@ export const applyQuerySort = (q: {ascending: Function, descending: Function}, d
     }
 };
 
+const defaultKeyBuilder = (v: unknown) => String(v);
+
+function deduplicate<T = unknown>(x: T[], keyBuilder?: (v: T) => string) {
+    const b = keyBuilder || defaultKeyBuilder;
+    return Object.values(x.reduce((acc, k) => Object.assign(acc, {[b(k)]: k}), {} as Record<string, T>));
+}
+
 const runQuery = async (m, {index = undefined, hashKey = undefined, rangeKey = undefined, criteria, fields, limit, offset, sort, scan = false, options = {}}) => {
     try {
         const {query, modifiers} = buildQueryDefinitionFromCriteria(index, hashKey, rangeKey, criteria, scan);
@@ -201,7 +208,7 @@ const runQuery = async (m, {index = undefined, hashKey = undefined, rangeKey = u
         if (!q || !q.exec) throw new Error('Unable to build query/scan from definition');
         q = applyModifiers(q, modifiers);
         if (limit) q.limit(limit);
-        if (fields && fields.length) q.attributes(fields);
+        if (fields && fields.length) q.attributes(deduplicate(fields));
         if (offset) q.startAt(offset);
         if (sort) applyQuerySort(q, sort);
         if (options) {
