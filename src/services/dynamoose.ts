@@ -325,6 +325,55 @@ export default {
             new dynamoose.Schema(schema, schemaOptions),
             {...options, ...globalOptions({name})}
         );
+
+        const getFn = async (payload) => {
+            debugServiceDynamooseGet('payload %j', payload);
+            let doc;
+            let docs;
+            let idValue;
+            let consistent = false;
+            if ('string' === typeof payload.id) {
+                idValue = payload.id;
+                consistent = Boolean(payload.consistent);
+                doc = await model.get(idValue, ...(consistent ? [{ consistent } as any] : []));
+            } else if (Array.isArray(payload.id)) {
+                idValue = payload.id.map(id => ({id}));
+                docs = await model.batchGet(idValue);
+            } else if ('object' === typeof payload.id) {
+                idValue = payload.id;
+                [doc = undefined] = (await runQuery(model, {
+                    criteria: {_: convertToQueryDsl(idValue)},
+                    fields: payload.fields || {},
+                    limit: 1,
+                    offset: undefined,
+                    sort: undefined,
+                    scan: false,
+                }) || []).map(d => ({...(d || {})}));
+            } else if (('object' === typeof payload) && 0 < Object.keys(payload).length) {
+                const {index = undefined, fields = [], scan = false, ...criteria} = payload;
+                idValue = criteria;
+                [doc = undefined] = (await runQuery(model, {
+                    index,
+                    criteria,
+                    fields,
+                    limit: 1,
+                    offset: undefined,
+                    sort: undefined,
+                    scan,
+                }) || []).map(d => ({...(d || {})}));
+            }
+            let r: any = undefined;
+            if (docs) {
+                r = [...docs];
+            } else if (!doc) {
+                throw new DocumentNotFoundError(name, idValue);
+            } else {
+                r = {...(doc || {})};
+            }
+            debugServiceDynamooseGet('result %j', r);
+            return r;
+        };
+
         return {
             find: async (payload) => {
                 debugServiceDynamooseFind('payload %j', payload);
@@ -334,53 +383,10 @@ export default {
                 debugServiceDynamooseFind('result %j', r);
                 return r;
             },
-            get: async (payload) => {
-                debugServiceDynamooseGet('payload %j', payload);
-                let doc;
-                let docs;
-                let idValue;
-                let consistent = false;
-                if ('string' === typeof payload.id) {
-                    idValue = payload.id;
-                    consistent = Boolean(payload.consistent);
-                    doc = await model.get(idValue, ...(consistent ? [{ consistent } as any] : []));
-                } else if (Array.isArray(payload.id)) {
-                    idValue = payload.id.map(id => ({id}));
-                    docs = await model.batchGet(idValue);
-                } else if ('object' === typeof payload.id) {
-                    idValue = payload.id;
-                    [doc = undefined] = (await runQuery(model, {
-                        criteria: {_: convertToQueryDsl(idValue)},
-                        fields: payload.fields || {},
-                        limit: 1,
-                        offset: undefined,
-                        sort: undefined,
-                        scan: false,
-                    }) || []).map(d => ({...(d || {})}));
-                } else if (('object' === typeof payload) && 0 < Object.keys(payload).length) {
-                    const {index = undefined, fields = [], scan = false, ...criteria} = payload;
-                    idValue = criteria;
-                    [doc = undefined] = (await runQuery(model, {
-                        index,
-                        criteria,
-                        fields,
-                        limit: 1,
-                        offset: undefined,
-                        sort: undefined,
-                        scan,
-                    }) || []).map(d => ({...(d || {})}));
-                }
-                let r: any = undefined;
-                if (docs) {
-                    r = [...docs];
-                } else if (!doc) {
-                    throw new DocumentNotFoundError(name, idValue);
-                } else {
-                    r = {...(doc || {})};
-                }
-                debugServiceDynamooseGet('result %j', r);
-                return r;
+            getConsistent: async (payload) => {
+                return getFn({...payload, consistent: true});
             },
+            get: getFn,
             delete: async (payload) => {
                 debugServiceDynamooseDelete('payload %j', payload);
                 let doc;
