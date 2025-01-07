@@ -201,7 +201,7 @@ function deduplicate<T = unknown>(x: T[], keyBuilder?: (v: T) => string) {
     return Object.values(x.reduce((acc, k) => Object.assign(acc, {[b(k)]: k}), {} as Record<string, T>));
 }
 
-const runQuery = async (m, {index = undefined, hashKey = undefined, rangeKey = undefined, criteria, fields, limit, offset, sort, scan = false, options = {}}) => {
+const runQuery = async (m, {consistent = undefined, index = undefined, hashKey = undefined, rangeKey = undefined, criteria, fields, limit, offset, sort, scan = false, options = {}}) => {
     try {
         const {query, modifiers} = buildQueryDefinitionFromCriteria(index, hashKey, rangeKey, criteria, scan);
         let q = (!scan && query) ? m.query(query) : m.scan();
@@ -210,6 +210,7 @@ const runQuery = async (m, {index = undefined, hashKey = undefined, rangeKey = u
         if (limit) q.limit(limit);
         if (fields && fields.length) q.attributes(deduplicate(fields));
         if (offset) q.startAt(offset);
+        if (consistent) q.consistent();
         if (sort) applyQuerySort(q, sort);
         if (options) {
             if (options['consistent']) q.consistent();
@@ -338,9 +339,11 @@ export default {
                 let doc;
                 let docs;
                 let idValue;
+                let consistent = false;
                 if ('string' === typeof payload.id) {
                     idValue = payload.id;
-                    doc = await model.get(idValue);
+                    consistent = Boolean(payload.consistent);
+                    doc = await model.get(idValue, ...(consistent ? [{ consistent } as any] : []));
                 } else if (Array.isArray(payload.id)) {
                     idValue = payload.id.map(id => ({id}));
                     docs = await model.batchGet(idValue);
