@@ -745,12 +745,12 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@ohoareau/aws@^0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.3.7.tgz#904010e644ce75a59bb1f88b19ba484c48d50c2a"
-  integrity sha512-tld5UIWkBkus9Kh7SMKmOSzEZoWZbuuAlQXYbiuREyvSzgbKjF2Ny/dGUOxTq3lo7dOH4R08ZpGNvk/CWlZvyg==
+"@ohoareau/aws@^0.3.14":
+  version "0.3.14"
+  resolved "https://registry.yarnpkg.com/@ohoareau/aws/-/aws-0.3.14.tgz#58d3fad858f776683f27be39028ac70db217d8a2"
+  integrity sha512-hYgFaF2XFfL8jyf1mBmTznosBkIXxqj06sXFQN/BdF0jCSrn5NR3CLgFmCEf7RU7wGt0kmkdFwIRhqbRGEUrAg==
   dependencies:
-    "@ohoareau/errors" "^0.2.0"
+    "@ohoareau/errors" "^0.2.1"
     uuid "^8.3.1"
 
 "@ohoareau/build-package@^0.2.1":
@@ -762,6 +762,11 @@
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@ohoareau/errors/-/errors-0.2.0.tgz#57090bc098648951f006a203fa529138dd61a17c"
   integrity sha512-mmy0ZAKUilcIbIH73Cfobh9UeMVJc4eLFAYXpJ9ZTNvBGH7dDnRaSOoKJumT3KRSWUU8gDeLF/UTb5qZdxeOqA==
+
+"@ohoareau/errors@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@ohoareau/errors/-/errors-0.2.1.tgz#0027fb93e503ad160aedd397c54294fc4f772e21"
+  integrity sha512-vOGmQyRgCLMI3FnAyM+BDg5kZ2V7qth/SYDX++/a5ldp05cJz3yR4tLclRw1WxqXPHMNxDlPLZHyZipXXziu4Q==
 
 "@ohoareau/migrate@^0.3.1":
   version "0.3.1"

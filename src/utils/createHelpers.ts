@@ -49,6 +49,47 @@ export function createHelpers(model, dir) {
         const snsPublish = async (topic, message, attributes = {}) => {
             return require('./services/aws/sns').default.publish({message, attributes, topic})
         };
+        const message = async (topic: string, message: any, ...rest: any[]) => {
+            const originalNb = rest.length;
+            /* const query = */ rest.pop(); // query
+            /* const result = */ rest.pop(); // result
+            let attributes: any = undefined;
+            let group: string | undefined;
+            let deduplication: string | undefined;
+            let subject: string | undefined;
+            switch (rest.length) {
+                case 0:
+                    break;
+                case 1:
+                    attributes = rest.pop();
+                    break;
+                case 2:
+                    group = rest.pop();
+                    attributes = rest.pop();
+                    break;
+                case 3:
+                    deduplication = rest.pop();
+                    group = rest.pop();
+                    attributes = rest.pop();
+                    break;
+                case 4:
+                    deduplication = rest.pop();
+                    group = rest.pop();
+                    attributes = rest.pop();
+                    subject = rest.pop();
+                    break;
+                default:
+                    throw new Error(`Unsupported number of arguments for message helper (nb: ${originalNb})`);
+            }
+            return require('./services/aws/sns').default.publish({
+                message,
+                ...(attributes ? { attributes } : {}),
+                ...(group ? { group } : {}),
+                ...(deduplication ? { deduplication } : {}),
+                ...(subject ? { subject } : {}),
+                topic,
+            })
+        };
         const eventbridgeSend = async (detailType: string, result: any, query: any) => {
             return hook('@eventbridge/send', [result, query], {detailType});
         }
@@ -84,7 +125,7 @@ export function createHelpers(model, dir) {
             isNotDefined, isDefined, isLessThan, isLessOrEqualThan, isGreaterThan, isGreaterOrEqualThan, isModulo,
             isValueCleared, hasValueChanged, isValueUnemptied,
             event, hook, call, lambdaEvent, snsPublish, updateReferences, deleteReferences, updateStats, rule,
-            postEnhance, preEnhance, refresh,
+            postEnhance, preEnhance, refresh, message,
         };
     };
 }
