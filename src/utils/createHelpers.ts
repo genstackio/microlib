@@ -51,8 +51,8 @@ export function createHelpers(model, dir) {
         };
         const message = async (topic: string, message: any, ...rest: any[]) => {
             const originalNb = rest.length;
-            /* const query = */ rest.pop(); // query
-            /* const result = */ rest.pop(); // result
+            const query = rest.pop();
+            const result = rest.pop();
             let attributes: any = undefined;
             let group: string | undefined;
             let deduplication: string | undefined;
@@ -82,7 +82,16 @@ export function createHelpers(model, dir) {
                     throw new Error(`Unsupported number of arguments for message helper (nb: ${originalNb})`);
             }
             return require('./services/aws/sns').default.publish({
-                message,
+                message: undefined === message
+                  ? (undefined === result
+                    ? (query.id
+                      ? { id: query.id, ...(query.data ? { data: query.data} : {})}
+                      : {...(query.data
+                            ? { data: query.data } : {})
+                        }
+                    )
+                    : result)
+                : message,
                 ...(attributes ? { attributes } : {}),
                 ...(group ? { group } : {}),
                 ...(deduplication ? { deduplication } : {}),
