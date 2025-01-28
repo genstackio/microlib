@@ -23,7 +23,7 @@
         "test": "jest --config jest.config.js"
     },
     "dependencies": {
-        "@ohoareau/aws": "^0.3.14",
+        "@ohoareau/aws": "^0.3.15",
         "@ohoareau/build-package": "^0.2.1",
         "@ohoareau/errors": "^0.2.0",
         "@genstackio/auth-jwt": "^0.1.3",
