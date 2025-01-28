@@ -44,10 +44,10 @@ export function createHelpers(model, dir) {
         const deleteReferences = async (result, query) => hook('@delete-references', [result, query]);
         const updateStats = async (result, query, operation: string|undefined = undefined) => hook('@update-stats', [result, query, operation]);
         const lambdaEvent = async (arn, payload) => {
-            return require('./services/aws/lambda').default.execute(arn, payload, {async: true})
+            return require('../services/aws/lambda').default.execute(arn, payload, {async: true})
         };
         const snsPublish = async (topic, message, attributes = {}) => {
-            return require('./services/aws/sns').default.publish({message, attributes, topic})
+            return require('../services/aws/sns').default.publish({message, attributes, topic})
         };
         const message = async (topic: string, message: any, ...rest: any[]) => {
             const originalNb = rest.length;
@@ -81,7 +81,7 @@ export function createHelpers(model, dir) {
                 default:
                     throw new Error(`Unsupported number of arguments for message helper (nb: ${originalNb})`);
             }
-            return require('./services/aws/sns').default.publish({
+            return require('../services/aws/sns').default.publish({
                 message: undefined === message
                   ? (undefined === result
                     ? (query.id
