@@ -12,11 +12,13 @@ const buildValueGenerator = ({type, config = {}}, dir) => {
 export default ({model, dir, prefix = undefined}) => async data => {
     const valuesKey = prefix ? `${prefix}Values` : 'values';
     let v;
+    const passKey = `${valuesKey}Pass`;
     data.autoPopulated = data.autoPopulated || {};
     const MAX_LOOP = 20;
     const passes = Object.entries(model[valuesKey] || {}).reduce((acc, [k, v]: [string, any]) => {
-        v.pass = v.pass || 1;
-        const kk = Number(v.pass);
+        v.config = v.config || {};
+        v.config[passKey] = v.config[passKey] || 1;
+        const kk = Number(v.config[passKey]);
         let ii = 0;
         while (acc.length < kk) {
             if (ii > MAX_LOOP) throw new Error(`Too many populate passes for ${k}`);

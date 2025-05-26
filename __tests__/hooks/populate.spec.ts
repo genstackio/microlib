@@ -48,7 +48,7 @@ describe('populate', () => {
             { data: { a: 42, b: true, c: "Hello" }, autoPopulated: { b: true } },
         ],
         ['multi-passes values',
-            { values: { b: {type: '@value', pass: 2, config: {value: '{{z}}'}}, z: {type: '@value', config: {value: 12}} }},
+            { values: { b: {type: '@value', config: {valuesPass: 2, value: '{{z}}'}}, z: {type: '@value', config: {value: 12}} }},
             { data: { a: 42, b: false, c: "Hello" } },
             { data: { a: 42, b: "12", c: "Hello", z: 12 }, autoPopulated: { b: true, z: true } },
         ],
