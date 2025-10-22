@@ -11,6 +11,17 @@ export const http = ({http}) => async data => {
     if (!res.ok) throw new Error(`Unable to fetch ${url}`);
     return res.json();
 }
+export const first = ({first}) => data => {
+  const attrNames = (first || '').split(/,/g).map(x => x.trim()).filter(x => !!x);
+  if (!data) return undefined;
+  const foundAttrName = String(attrNames.find(x => !!data?.[x])) || undefined;
+  if (!foundAttrName) return undefined;
+  return data?.[foundAttrName] || undefined;
+};
+export const last = ({last}) => data => {
+  const attrNames = (last || '').split(/,/g).map(x => x.trim()).filter(x => !!x);
+  return first({first: attrNames.reverse().join(',')})(data);
+};
 export const from = ({name}) => data => (data && name) ? data[name] : undefined
 export const uuid = ({uuid = 'v4'}) => () => require('uuid')[uuid]();
 export const value = ({value}) => data => {
