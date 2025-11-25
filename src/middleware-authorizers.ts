@@ -1,3 +1,5 @@
+import {mAuthorizerError} from "./m";
+
 const s = (authorized: boolean, status: string, reason: string|undefined = undefined) => ({authorized, status, reason});
 
 // noinspection JSUnusedGlobalSymbols
@@ -7,6 +9,19 @@ export const unknown = (config: any) => async () => s(false, 'unknown', config?.
 // noinspection JSUnusedGlobalSymbols
 export const user = () => async ({req}) => {
     if (!req.user || (!req.user.id)) return s(false, 'forbidden', 'authorization required');
+    return s(true, 'allowed');
+};
+export const log_non_user = () => async ({req}) => {
+    if (!req.user || (!req.user.id)) {
+      try {
+        // noinspection ExceptionCaughtLocallyJS
+        throw new Error('Non user')
+      } catch (e: any) {
+        await mAuthorizerError(e, 'log_non_user', {data: { user: req.user, operation: req.authorization?.operation }})
+      }
+    }
+
+    // silent, alway allow.
     return s(true, 'allowed');
 };
 // noinspection JSUnusedGlobalSymbols

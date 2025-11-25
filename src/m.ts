@@ -14,6 +14,10 @@ export async function mBackendError(e: any, backend: string, ctx: any = {}) {
     return mError(e, {...ctx, tags: {mechanism: 'backend', backend, ...(ctx.tags || {})}});
 }
 
+export async function mAuthorizerError(e: any, authorizer: string, ctx: any = {}) {
+    return mError(e, {...ctx, tags: {mechanism: 'authorizer', authorizer, ...(ctx.tags || {})}});
+}
+
 export async function mConverterError(e: any, converter: string, ctx: any = {}) {
     return mHookError(e, 'convert', {...ctx, tags: {converter, ...(ctx.tags || {})}});
 }
