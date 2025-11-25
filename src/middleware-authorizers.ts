@@ -1,58 +1,66 @@
-export const status = ({authorized, status, reason = undefined}: any) => async () => ({authorized, status, reason});
-export const allowed = config => status({...config, authorized: true, status: 'allowed'});
-export const unknown = config => status({...config, authorized: false, status: 'unknown'});
+const s = (authorized: boolean, status: string, reason: string|undefined = undefined) => ({authorized, status, reason});
+
+// noinspection JSUnusedGlobalSymbols
+export const status = ({authorized, status, reason = undefined}: any) => async () => s(authorized, status, reason);
+export const allowed = (config: any) => s(true, 'allowed', config?.reason);
+export const unknown = (config: any) => s(false, 'unknown', config?.reason);
+// noinspection JSUnusedGlobalSymbols
 export const user = () => async ({req}) => {
-    if (!req.user || (!req.user.id)) return {status: 'forbidden', reason: 'authorization required'};
-    return ({authorized: true, status: 'allowed'});
+    if (!req.user || (!req.user.id)) return s(false, 'forbidden', 'authorization required');
+    return s(true, 'allowed');
 };
+// noinspection JSUnusedGlobalSymbols
 export const anonymous = ()  => async ({req}) => {
-    if (!!req.user && (!!req.user.id)) return {status: 'forbidden', reason: 'anonymous user allowed only'};
-    return ({authorized: true, status: 'allowed'});
+    if (!!req.user && (!!req.user.id)) return s(false, 'forbidden', 'anonymous user allowed only');
+    return s(true, 'allowed');
 };
+// noinspection JSUnusedGlobalSymbols
 export const service = ({name, method}, {dir})  => async ({req}) => {
     try {
         const result = await require(`${dir}/services/${name}`)[method](req);
-        return {status: 'allowed', authorized: true, ...(result || {})};
+        return s('undefined' !== typeof result?.authorized ? result.authorized : true, 'undefined' !== typeof result?.status ? result.status : 'allowed', result?.reason);
     } catch (e: any) {
-        return {authorized: false, status: 'error', reason: e.message};
+        return s(false, 'error', e.message);
     }
 };
 export const acl = ({acls})  => async ({req}) => {
     try {
-        const s = await require('./services/acl').default(acls);
+        const s = require('./services/acl').default(acls);
         if (!(await s.test(req))) {
-            return {authorized: false, status: 'error', reason: 'not allowed'};
+            return s(false, 'error', 'not allowed');
         }
-        return {status: 'allowed', authorized: true};
+        return s(true, 'allowed');
     } catch (e: any) {
-        return {authorized: false, status: 'error', reason: e.message};
+        return s(false, 'error', e.message);
     }
 };
+// noinspection JSUnusedGlobalSymbols
 export const lambda = ({arn, ttl = -1}) => {
     const lambda = require('../services/aws/lambda').default;
     return async ({req}: any) => {
-        let result;
+        let result: any;
         try {
             result = await lambda.execute(arn, {params: {...req.authorization, ttl}});
         } catch (e: any) {
-            return {status: 'error', error: e, authorized: false};
+            return s(false, 'error', e.message);
         }
-        if (!result || !result.status) return {status: 'no-status', authorized: false};
+        if (!result || !result.status) return s(false, 'no-status');
         switch (result.status) {
-            case 'allowed': return {...(result.metadata || {}), status: 'allowed', authorized: true};
-            case 'forbidden': return {status: 'forbidden' || undefined, ...(result.metadata || {}), authorized: false};
-            default: return {status: 'unknown', reason: result.status, ...(result.metadata || {}), authorized: false};
+            case 'allowed': return s(true, 'allowed', result.metadata?.reason);
+            case 'forbidden': return s(false, result?.metadata?.status || 'forbidden', result.metadata?.reason);
+          default: return s(false, result?.status || 'unknown', result?.reason || result?.status);
         }
     };
 };
 
-const testUserRole = (user, role, message = undefined) => {
+const testUserRole = (user: any, role: any, message = undefined) => {
     if (!role || !Array.isArray(role) || (!role.length)) return;
     if (!user || !user.permissions || !Array.isArray(user.permissions) || !role.find(p => user.permissions.includes(p))) {
-        return {status: 'forbidden', authorized: false, reason: message || 'missing role'};
+        return s(false, 'forbidden', message || 'missing role');
     }
-    return {status: 'allowed', authorized: true};
+    return s(true, 'allowed');
 }
-export const denied = () => async () => status({status: 'forbidden', authorized: false, reason: 'denied'});
-export const admin = () => async (v, {user}) => testUserRole(user, ['admin']);
-export const roles = ({roles = []}) => async (v, {user}) => testUserRole(user, roles);
+export const denied = () => async () => s(false, 'forbidden', 'denied');
+export const admin = () => async (_: any, {user}) => testUserRole(user, ['admin']);
+// noinspection JSUnusedGlobalSymbols
+export const roles = ({roles = []}) => async (_: any, {user}) => testUserRole(user, roles);
