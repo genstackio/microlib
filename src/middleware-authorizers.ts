@@ -2,8 +2,8 @@ const s = (authorized: boolean, status: string, reason: string|undefined = undef
 
 // noinspection JSUnusedGlobalSymbols
 export const status = ({authorized, status, reason = undefined}: any) => async () => s(authorized, status, reason);
-export const allowed = (config: any) => s(true, 'allowed', config?.reason);
-export const unknown = (config: any) => s(false, 'unknown', config?.reason);
+export const allowed = (config: any) => async () => s(true, 'allowed', config?.reason);
+export const unknown = (config: any) => async () => s(false, 'unknown', config?.reason);
 // noinspection JSUnusedGlobalSymbols
 export const user = () => async ({req}) => {
     if (!req.user || (!req.user.id)) return s(false, 'forbidden', 'authorization required');
