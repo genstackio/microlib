@@ -70,12 +70,12 @@ export const lambda = ({arn, ttl = -1}) => {
 
 const testUserRole = (user: any, role: any, message = undefined) => {
     if (!role || !Array.isArray(role) || (!role.length)) return;
-    if (!user || !user.permissions || !Array.isArray(user.permissions) || !role.find(p => user.permissions.includes(p))) {
+    if (!user || !user?.permissions || !Array.isArray(user.permissions) || !role.find(p => user.permissions.includes(p))) {
         return s(false, 'forbidden', message || 'missing role');
     }
     return s(true, 'allowed');
 }
 export const denied = () => async () => s(false, 'forbidden', 'denied');
-export const admin = () => async (_: any, {user}) => testUserRole(user, ['admin']);
+export const admin = () => async ({req}) => testUserRole(req?.user, ['admin']);
 // noinspection JSUnusedGlobalSymbols
-export const roles = ({roles = []}) => async (_: any, {user}) => testUserRole(user, roles);
+export const roles = ({roles = []}) => async ({req}) => testUserRole(req?.user, roles);
