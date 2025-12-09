@@ -1,4 +1,5 @@
 import {Readable} from "stream";
+import {Blob} from "node:buffer";
 
 const allowedBucketsForFetching = (process.env.FETCHABLE_BUCKET_NAMES || '').split(/\s*,\s*/g).filter(x => !!x).reduce((acc, k) => Object.assign(acc, {[k]: true}), {});
 
