@@ -1,7 +1,5 @@
 .idea/
 node_modules/
-lerna-debug.log
-npm-debug.log
 coverage/
 *.log
 *.tsbuildinfo

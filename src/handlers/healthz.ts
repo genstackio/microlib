@@ -1,1 +1,0 @@
-export default async () => ({status: 'ok', code: 1001, message: 'healthy'})

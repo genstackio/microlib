@@ -1,21 +1,16 @@
 import caller from "../services/caller";
 import evaluate from "../utils/evaluate";
-import d from 'debug';
 import extractVariablePropertyNamesInExpression from "../utils/extractVariablePropertyNamesInExpression";
 import deduplicateAndSort from "../utils/deduplicateAndSort";
 import {mHookError} from "../m";
 
-const debugHookUpdateStats = d('micro:hooks:update-stats');
-
 // noinspection JSUnusedGlobalSymbols
-export default ({o, on, model: {statTargets = {}}, dir}) => async (result, query, operation: string|undefined = undefined) => {
-    const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
+export default ({on, model: {statTargets = {}}, dir}) => async (result: any, query: any, operation: string|undefined = undefined) => {
+    const call = async (name: string, ...args: any[]) => caller.execute(name, args, `${dir}/services/crud`);
     const op = operation || on;
     const toTrigger = computeToTrigger(op, statTargets);
 
     if (!toTrigger || !Object.keys(toTrigger).length) return result;
-
-    debugHookUpdateStats('%s %s => to trigger %j', o, op, toTrigger);
 
     const report = await Promise.allSettled(Object.entries(toTrigger).map(async ([a, b]: [any, any]) => {
         return Promise.allSettled(Object.entries(b).map(async ([_, b2]: [any, any]) => {
@@ -24,8 +19,6 @@ export default ({o, on, model: {statTargets = {}}, dir}) => async (result, query
         }));
     }));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
-
-    debugHookUpdateStats('%s %s => report %j', o, op, report);
 
     return result;
 }
@@ -209,8 +202,6 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
 
     if (!updateCriteria) return; // unable to detect criteria to filter items
     if (!updateData || (('function' !== typeof updateData) && !Object.keys(updateData).length)) return; // nothing to update
-
-    debugHookUpdateStats('apply %j %j', updateCriteria, updateData);
 
     try {
         let offset: any = undefined;

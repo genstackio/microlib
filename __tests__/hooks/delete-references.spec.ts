@@ -9,13 +9,13 @@ beforeEach(() => {
 describe('deleteReferences', () => {
     it('execute with nothing', async () => {
         const model = {};
-        expect(await deleteReferences({o: 'bla', model, dir: '.'})({}, undefined)).toEqual({});
+        expect(await deleteReferences({model, dir: '.'})({}, undefined)).toEqual({});
     });
     it('execute with no trackers', async () => {
         const model = {
             referenceTargets: {},
         }
-        expect(await deleteReferences({o: 'bla', model, dir: '.'})({}, undefined)).toEqual({});
+        expect(await deleteReferences({model, dir: '.'})({}, undefined)).toEqual({});
     });
     it('execute with trackers', async () => {
         (callerMock.execute as jest.Mock).mockResolvedValueOnce({
@@ -81,7 +81,7 @@ describe('deleteReferences', () => {
         const result = {
             id: 'aaaa-bbbb',
         }
-        expect(await deleteReferences({o: 'bla', model, dir: '.'})(result, query)).toEqual(result);
+        expect(await deleteReferences({model, dir: '.'})(result, query)).toEqual(result);
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             1,
             'a_b_find',

@@ -9,13 +9,13 @@ beforeEach(() => {
 describe('updateStats', () => {
     it('execute with nothing', async () => {
         const model = {};
-        expect(await updateStats({o: 'bla', on: 'create', model, dir: '.'})({}, undefined)).toEqual({});
+        expect(await updateStats({on: 'create', model, dir: '.'})({}, undefined)).toEqual({});
     });
     it('execute with no trackers', async () => {
         const model = {
             statTargets: {},
         }
-        expect(await updateStats({o: 'bla', on: 'create', model, dir: '.'})({}, undefined)).toEqual({});
+        expect(await updateStats({on: 'create', model, dir: '.'})({}, undefined)).toEqual({});
     });
     it('execute with trackers', async () => {
         (callerMock.execute as jest.Mock).mockResolvedValueOnce({
@@ -82,7 +82,7 @@ describe('updateStats', () => {
             id: 'aaaa-bbbb',
             x: 7,
         }
-        expect(await updateStats({o: 'bla', on: 'create', model, dir: '.'})(result, query)).toEqual(result);
+        expect(await updateStats({on: 'create', model, dir: '.'})(result, query)).toEqual(result);
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             1,
             'a_b_find',
@@ -193,7 +193,7 @@ describe('updateStats', () => {
             id: 'aaaa-bbbb',
             x: 7,
         }
-        expect(await updateStats({o: 'bla', on: 'create', model, dir: '.'})(result, query)).toEqual(result);
+        expect(await updateStats({on: 'create', model, dir: '.'})(result, query)).toEqual(result);
         expect(callerMock.execute).toHaveBeenNthCalledWith(
             1,
             'a_b_find',

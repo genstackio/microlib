@@ -46,7 +46,6 @@ export const uuid = () => match({pattern: '^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}
 export const url = () => match({pattern: '^http[s]?://.+$', flags: 'i', message: `Not a valid URL`});
 export const arn = () => match({pattern: '^arn:[^:]*:[^:]*:[^:]*:[^:]*:.+$', message: `Not a valid AWS ARN`});
 export const unknown = () => ({test: () => false, message: () => `Unknown validator`});
-export const isbn = () => ({test: v => !!require('isbn3').parse(v), message: () => 'ISBN is not valid'});
 export const visaNumber = () => ({test: v => /^[0-9]+$/.test(v), message: () => 'Visa number is not valid'});
 export const jsonString = () => ({check: v => JSON.parse(v)});
 export const unique = ({type, hashKey, index, dir}) => ({check: async (v, {id = undefined, idField = 'id'}: {id?: string, idField?: string} = {}) => {
@@ -115,5 +114,3 @@ export const reference = ({type, localField, idField, targetIdField, fetchedFiel
         }
     });
 };
-export const dynaform = () => ({check: require('@ohoareau/dynaform').validate})
-export const dynaformString = () => ({check: v => require('@ohoareau/dynaform').validate(JSON.parse(v))})

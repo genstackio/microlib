@@ -1,22 +1,15 @@
 import caller from "../services/caller";
-import d from 'debug';
 import {mHookError} from "../m";
 
-const debugHookDeleteReferences = d('micro:hooks:delete-references');
-
 // noinspection JSUnusedGlobalSymbols
-export default ({o, model: {referenceTargets = {}}, dir}) => async (result, query) => {
-    const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
+export default ({model: {referenceTargets = {}}, dir}) => async (result: any, query: any) => {
+    const call = async (name: string, ...args: any[]) => caller.execute(name, args, `${dir}/services/crud`);
     const toTrigger = computeToTrigger(referenceTargets);
 
     if (!toTrigger || !toTrigger.trackers || !Object.keys(toTrigger.trackers).length) return result;
 
-    debugHookDeleteReferences('%s => to trigger %j', o, toTrigger);
-
     const report = await Promise.allSettled(Object.entries(toTrigger.trackers).map(async ([a, b]: [any, any]) => applyTrigger(result, query, a, b, call)));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
-
-    debugHookDeleteReferences('%s => report %j', o, report);
 
     return result;
 }
@@ -40,7 +33,7 @@ function computeDeleteCriteriaForTrigger(result: any, query: any, tracker: any) 
     if (!joinFieldName || (undefined === fieldValue)) return undefined;
     return {[joinFieldName]: fieldValue};
 }
-function computeDeleteFieldsForTrigger(criteria) {
+function computeDeleteFieldsForTrigger(criteria: any) {
     const keys = {id: true, cursor: true};
     Object.keys(criteria).reduce((acc: any, n: string) => Object.assign(acc, {[n]: true}), keys);
     const keyNames = Object.keys(keys);
@@ -52,8 +45,6 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
     const deleteFields = computeDeleteFieldsForTrigger(deleteCriteria);
 
     if (!deleteCriteria) return; // unable to detect criteria to filter items
-
-    debugHookDeleteReferences('apply %j %j', deleteCriteria, deleteFields);
 
     try {
         let offset: any = undefined;
@@ -68,7 +59,7 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
                 criteria: deleteCriteria,
                 fields: deleteFields,
             });
-            await Promise.allSettled(((page || {}).items || []).map(async item => {
+            await Promise.allSettled(((page || {}).items || []).map(async (item: any) => {
                 try {
                     // keep the await
                     return await call(`${name}_delete`, {

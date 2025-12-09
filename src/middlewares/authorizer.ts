@@ -1,8 +1,3 @@
-import d from 'debug';
-
-const debugAuthorizerMiddleware = d('micro:middleware:authorizer');
-
-
 const createAuthorizer = ({type, dir, ...config }) => {
     let a;
     if ('@' === type.slice(0, 1)) {
@@ -25,14 +20,12 @@ export default (cfg) => {
     const builtConfig = buildAuthorizerConfig(cfg);
     const authorizer = createAuthorizer(builtConfig);
     return async (req, res, next) => {
-        debugAuthorizerMiddleware('config %j', builtConfig);
         req.authorization = {
             authorized: false,
             user: req.user,
             operation: o,
         };
         const result = await authorizer({req, res});
-        debugAuthorizerMiddleware('result %j', result);
         if (!result || !result.authorized || 'allowed' !== result.status) {
             switch ((result || {}).status) {
                 case 'forbidden':
@@ -48,7 +41,6 @@ export default (cfg) => {
             }
         }
         Object.assign(req.authorization, result);
-        debugAuthorizerMiddleware('authorization %j', req.authorization);
         return next();
     };
 }

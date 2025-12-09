@@ -1,8 +1,3 @@
-import d from 'debug';
-
-const debugServiceCallerExecuteLocal = d('micro:service:caller:execute:local');
-const debugServiceCallerExecuteRemote = d('micro:service:caller:execute:remote');
-
 const inferArnIfPossible = dsn => {
     const upperCasedName = `${dsn.toUpperCase().replace(/[^A-Z0-9_]+/g, '_')}`;
     const sluggedName = dsn.replace(/\./g, '-');
@@ -15,24 +10,14 @@ const inferArnIfPossible = dsn => {
 };
 
 const executeLocal = async (operation, params, dir: string|undefined = undefined) => {
-    debugServiceCallerExecuteLocal('call %j', {operation, params, dir})
     const tokens = operation.split(/_/g);
     const op = tokens.pop();
-    let r: any;
-    if (dir) {
-        r = await require(`${dir}/${tokens.join('_')}`)[op](...(Array.isArray(params) ? params : [params]));
-    } else {
-        r = await require(`@ohoareau/microlib/lib/services/${tokens.join('_')}`).default[op](...(Array.isArray(params) ? params : [params]));
-    }
-    debugServiceCallerExecuteLocal('result %j', r)
-    return r;
+    if (dir) return require(`${dir}/${tokens.join('_')}`)[op](...(Array.isArray(params) ? params : [params]));
+    return require(`@ohoareau/microlib/lib/services/${tokens.join('_')}`).default[op](...(Array.isArray(params) ? params : [params]));
 };
 
 const executeRemoteLambda = async (arn, params, options = {}) => {
-    debugServiceCallerExecuteRemote('call %j', {arn, params, options})
-    const r = await require('./aws/lambda').default.execute(arn, {params}, options);
-    debugServiceCallerExecuteRemote('result %j', r)
-    return r;
+    return require('./aws/lambda').default.execute(arn, {params}, options);
 };
 
 const executeRemote = async (dsn, params, options = {}) => {

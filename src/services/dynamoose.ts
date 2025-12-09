@@ -1,12 +1,5 @@
 import dynamoose from 'dynamoose';
 import DocumentNotFoundError from '@ohoareau/errors/lib/DocumentNotFoundError';
-import d from 'debug';
-
-const debugServiceDynamooseFind = d('micro:service:dynamoose:find');
-const debugServiceDynamooseGet = d('micro:service:dynamoose:get');
-const debugServiceDynamooseCreate = d('micro:service:dynamoose:create');
-const debugServiceDynamooseDelete = d('micro:service:dynamoose:delete');
-const debugServiceDynamooseUpdate = d('micro:service:dynamoose:update');
 
 const globalOptions = ({name}) => ({
     prefix: process.env[`DYNAMODB_${name.toUpperCase()}_TABLE_PREFIX`] || process.env.DYNAMODB_TABLE_PREFIX || undefined,
@@ -327,7 +320,6 @@ export default {
         );
 
         const getFn = async (payload) => {
-            debugServiceDynamooseGet('payload %j', payload);
             let doc;
             let docs;
             let idValue;
@@ -370,25 +362,19 @@ export default {
             } else {
                 r = {...(doc || {})};
             }
-            debugServiceDynamooseGet('result %j', r);
             return r;
         };
 
         return {
             find: async (payload) => {
-                debugServiceDynamooseFind('payload %j', payload);
                 const decodedPayload = {...decodePayload(payload), fields: payload?.selections?.items?.fields || []};
-                debugServiceDynamooseFind('decodedPayload %j', decodedPayload);
-                const r = buildPage(await runQuery(model, decodedPayload));
-                debugServiceDynamooseFind('result %j', r);
-                return r;
+                return buildPage(await runQuery(model, decodedPayload));
             },
             getConsistent: async (payload) => {
                 return getFn({...payload, consistent: true});
             },
             get: getFn,
             delete: async (payload) => {
-                debugServiceDynamooseDelete('payload %j', payload);
                 let doc;
                 let docs;
                 if ('string' === typeof payload.id) {
@@ -416,17 +402,12 @@ export default {
                 } else {
                     r = {...(doc || {})};
                 }
-                debugServiceDynamooseDelete('result %j', r);
                 return r;
             },
             create: async (payload) => {
-                debugServiceDynamooseCreate('payload %j', payload);
-                const r =  {...(await model.create({...(payload.data || {})}, payload.options) || {})};
-                debugServiceDynamooseCreate('result %j', r);
-                return r;
+                return {...(await model.create({...(payload.data || {})}, payload.options) || {})};
             },
             update: async (payload) => {
-                debugServiceDynamooseUpdate('payload %j', payload);
                 let doc: any;
                 let docs;
                 let ids = [];
@@ -453,7 +434,6 @@ export default {
                 } else {
                     r = {...(doc || {})};
                 }
-                debugServiceDynamooseUpdate('result %j', r);
                 return r;
             },
         };

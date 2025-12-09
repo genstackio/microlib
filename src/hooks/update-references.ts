@@ -1,25 +1,17 @@
 import caller from "../services/caller";
-import d from 'debug';
 import {mHookError} from "../m";
 
-const debugHookUpdateReferences = d('micro:hooks:update-references');
-
 // noinspection JSUnusedGlobalSymbols
-export default ({o, model: {referenceTargets = {}}, dir}) => async (result, query) => {
-    const call = async (name, ...args) => caller.execute(name, args, `${dir}/services/crud`);
+export default ({model: {referenceTargets = {}}, dir}) => async (result: any, query: any) => {
+    const call = async (name: string, ...args: any[]) => caller.execute(name, args, `${dir}/services/crud`);
     const changedFields = computeChangedFields(result, (query || {}).oldData);
     if (!changedFields || !Object.keys(changedFields).length) return result;
     const toTrigger = computeToTriggerFromChangedFields(changedFields, referenceTargets);
 
     if (!toTrigger || !toTrigger.trackers || !Object.keys(toTrigger.trackers).length) return result;
 
-    debugHookUpdateReferences('%s => changed %j', o, changedFields);
-    debugHookUpdateReferences('%s => to trigger %j', o, toTrigger);
-
     const report = await Promise.allSettled(Object.entries(toTrigger.trackers).map(async ([a, b]: [any, any]) => applyTrigger(result, query, a, b, call)));
     await Promise.allSettled(report.filter((r: any) => 'fulfilled' !== r.status).map(processTriggerError))
-
-    debugHookUpdateReferences('%s => report %j', o, report);
 
     return result;
 }
@@ -116,8 +108,6 @@ async function applyTrigger(result: any, query: any, name: string, tracker: any,
 
     if (!updateCriteria) return; // unable to detect criteria to filter items
     if (!updateData || !Object.keys(updateData).length) return; // nothing to update
-
-    debugHookUpdateReferences('apply %s %j %j %j', name, updateCriteria, updateData, updateFields);
 
     try {
         let offset: any = undefined;
