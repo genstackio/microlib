@@ -1,3 +1,5 @@
+import uniquable from "../utils/uniquable";
+
 const buildValueGenerator = ({type, config = {}}, dir) => {
     let g;
     if ('@' === type.slice(0, 1)) {
@@ -33,7 +35,8 @@ export default ({model, dir, prefix = undefined}) => async data => {
     data.autoPopulated = data.autoPopulated || {};
     await Promise.all(Object.entries(model[defaultValuesKey] || {}).map(async ([k, def]) => {
         if (data.data[k] !== undefined && data.data[k] !== null) return;
-        v = await buildValueGenerator(<any>def, dir)(data);
+        const gen = buildValueGenerator(<any>def, dir);
+        v = await uniquable(`${model.name}/${k}`, async () => gen(data), !!(def as any)?.unique);
         if ('**unchanged**' !== v) {
             if ('**clear**' === v) {
                 data.data[k] = undefined;
