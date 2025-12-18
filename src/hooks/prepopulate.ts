@@ -36,7 +36,7 @@ export default ({model, dir, prefix = undefined}) => async data => {
     await Promise.all(Object.entries(model[defaultValuesKey] || {}).map(async ([k, def]) => {
         if (data.data[k] !== undefined && data.data[k] !== null) return;
         const gen = buildValueGenerator(<any>def, dir);
-        v = await uniquable(`${model.name}/${k}`, async () => gen(data), !!(def as any)?.unique);
+        v = await uniquable(`${model.name}/${k}`, async () => gen(data), !!model?.fields?.[k]?.unique);
         if ('**unchanged**' !== v) {
             if ('**clear**' === v) {
                 data.data[k] = undefined;

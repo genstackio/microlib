@@ -24,7 +24,7 @@ export default ({model, dir}) => async data => {
             !dd.type && (dd.type = `${model.name}_${dd.field}`);
             const kk = dd['field'];
             const gen = buildValueGenerator(<any>dd, dir);
-            const v = await uniquable(`${model.name}/${kk}`, async () => gen(data.data[k], data), !!(def as any)?.unique);
+            const v = await uniquable(`${model.name}/${kk}`, async () => gen(data.data[k], data), !!model?.fields?.[kk]?.unique);
             if ('**unchanged**' !== v) {
                 if ('**clear**' === v) {
                     data.data[kk] = undefined;
