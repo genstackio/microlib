@@ -42,7 +42,7 @@ async function isDuplicateValue(type: string, value: any): Promise<boolean> {
       await client.put({
         TableName: TABLE_NAME!,
         Item: {
-          id: { S: id },
+          id,
         },
         ConditionExpression: 'attribute_not_exists(id)'
       });
@@ -67,6 +67,7 @@ async function isDuplicateValue(type: string, value: any): Promise<boolean> {
           result = undefined;
           break;
         default:
+          await mError(error, { tags: { uniquable_table_error: true }, data: { type, value, id, n }})
           // is an unexpected error
           throw error;
       }

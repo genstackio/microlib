@@ -31,7 +31,7 @@ describe('uniquable', () => {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv1' },
+        id: 'aaa#vvv1',
       },
     });
   })
@@ -49,14 +49,14 @@ describe('uniquable', () => {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv1' },
+        id: 'aaa#vvv1',
       },
     });
     expect(dynamodb.put).toHaveBeenNthCalledWith(2, {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv2' },
+        id: 'aaa#vvv2',
       },
     });
   })
@@ -77,21 +77,21 @@ describe('uniquable', () => {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv1' },
+        id: 'aaa#vvv1',
       },
     });
     expect(dynamodb.put).toHaveBeenNthCalledWith(2, {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv2' },
+        id: 'aaa#vvv2',
       },
     });
     expect(dynamodb.put).toHaveBeenNthCalledWith(3, {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv3' },
+        id: 'aaa#vvv3',
       },
     });
   })
@@ -108,14 +108,14 @@ describe('uniquable', () => {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv10' },
+        id: 'aaa#vvv10',
       },
     });
     expect(dynamodb.put).toHaveBeenNthCalledWith(2, {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv10' },
+        id: 'aaa#vvv10',
       },
     });
   })
@@ -132,7 +132,7 @@ describe('uniquable', () => {
       TableName: 'test-uniquable-table',
       ConditionExpression: 'attribute_not_exists(id)',
       Item: {
-        id: { S: 'aaa#vvv11' },
+        id: 'aaa#vvv11',
       },
     });
   })
